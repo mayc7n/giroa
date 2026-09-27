@@ -21,7 +21,7 @@ export type QuoteTotals = {
 export type ClientSummary = {
   id: string;
   name: string;
-  contact?: string;
+  contact?: string | null;
 };
 
 export type ClientSelection =

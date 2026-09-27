@@ -122,7 +122,7 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       );
       return input;
     },
-    async list(): Promise<ClientRecord[]> {
+    async list() {
       const rows = await db.getAllAsync<ClientRow>('SELECT * FROM clients ORDER BY name COLLATE NOCASE, id');
       return rows.map(mapClient);
     },

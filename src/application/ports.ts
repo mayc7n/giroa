@@ -6,6 +6,7 @@ import type {
   ServiceRecord,
   WorkStatus,
 } from '@/data/sqliteTypes';
+import type { ClientSummary } from '@/domain/types';
 
 export type CreateClientInput = {
   id: string;
@@ -52,7 +53,7 @@ export interface TransactionPort {
 
 export interface ClientRepository {
   create(input: CreateClientInput): Promise<ClientRecord>;
-  list(): Promise<ClientRecord[]>;
+  list(): Promise<ClientSummary[]>;
   getById(id: string): Promise<ClientRecord | null>;
 }
 
