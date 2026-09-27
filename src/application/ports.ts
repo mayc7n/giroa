@@ -1,5 +1,6 @@
 import type {
   ClientRecord,
+  ExpenseRecord,
   PaymentRecord,
   QuoteRecord,
   QuoteStatus,
@@ -43,6 +44,17 @@ export type CreatePaymentInput = {
   createdAt: string;
 };
 
+export type CreateExpenseInput = {
+  id: string;
+  description: string;
+  amountCents: number;
+  expenseDate: string;
+  category: string;
+  clientOperationId: string;
+  status: 'active';
+  createdAt: string;
+};
+
 export type OperationContext = {
   clientOperationId?: string;
 };
@@ -75,6 +87,14 @@ export interface PaymentRepository {
   getByOperationId(clientOperationId: string): Promise<PaymentRecord | null>;
   listByServiceId(serviceId: string): Promise<PaymentRecord[]>;
   listAll(): Promise<PaymentRecord[]>;
+  reverse(id: string, reversedAt: string): Promise<PaymentRecord>;
+}
+
+export interface ExpenseRepository {
+  create(input: CreateExpenseInput): Promise<ExpenseRecord>;
+  getByOperationId(clientOperationId: string): Promise<ExpenseRecord | null>;
+  listAll(): Promise<ExpenseRecord[]>;
+  reverse(id: string, reversedAt: string): Promise<ExpenseRecord>;
 }
 
 export type GiroaRepositories = {
@@ -82,5 +102,6 @@ export type GiroaRepositories = {
   quotes: QuoteRepository;
   services: ServiceRepository;
   payments: PaymentRepository;
+  expenses: ExpenseRepository;
   transactions: TransactionPort;
 };

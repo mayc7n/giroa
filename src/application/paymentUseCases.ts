@@ -1,11 +1,12 @@
 import { calculateBalance, validatePaymentAmount } from '@/domain/payment';
 import { assertISODate } from '@/domain/date';
 import type { PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
-import type { PaymentRepository, ServiceRepository } from './ports';
+import type { ExpenseRepository, PaymentRepository, ServiceRepository } from './ports';
 
 type PaymentUseCaseDependencies = {
   services: ServiceRepository;
   payments: PaymentRepository;
+  expenses?: ExpenseRepository;
   idFactory: () => string;
   clock: () => string;
 };
@@ -18,7 +19,7 @@ export type ServiceFinancialSummary = {
   balanceCents: number;
 };
 
-export function createPaymentUseCases({ services, payments, idFactory, clock }: PaymentUseCaseDependencies) {
+export function createPaymentUseCases({ services, payments, expenses, idFactory, clock }: PaymentUseCaseDependencies) {
   return {
     async register(input: {
       serviceId: string;
@@ -70,6 +71,9 @@ export function createPaymentUseCases({ services, payments, idFactory, clock }: 
         balanceCents: calculateBalance(service.totalCents, currentPayments),
       };
     },
+    async reversePayment(paymentId: string) {
+      return payments.reverse(paymentId, clock());
+    },
     async getCashSummary(period: { startDate: string; endDate: string }) {
       assertISODate(period.startDate);
       assertISODate(period.endDate);
@@ -77,6 +81,7 @@ export function createPaymentUseCases({ services, payments, idFactory, clock }: 
 
       const allServices = await services.list();
       const allPayments = await payments.listAll();
+      const allExpenses = expenses ? await expenses.listAll() : [];
       const activePayments = allPayments.filter((payment) => (
         payment.status === 'active'
         && payment.paymentDate >= period.startDate
@@ -87,11 +92,18 @@ export function createPaymentUseCases({ services, payments, idFactory, clock }: 
         return total + calculateBalance(service.totalCents, servicePayments);
       }, 0);
       const entriesCents = activePayments.reduce((total, payment) => total + payment.amountCents, 0);
+      const exitsCents = allExpenses
+        .filter((expense) => (
+          expense.status === 'active'
+          && expense.expenseDate >= period.startDate
+          && expense.expenseDate <= period.endDate
+        ))
+        .reduce((total, expense) => total + expense.amountCents, 0);
 
       return {
         entriesCents,
-        exitsCents: 0,
-        periodBalanceCents: entriesCents,
+        exitsCents,
+        periodBalanceCents: entriesCents - exitsCents,
         pendingCents,
       };
     },

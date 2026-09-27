@@ -1,6 +1,7 @@
 export type QuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'cancelled';
 export type WorkStatus = 'planned' | 'inProgress' | 'completed' | 'cancelled';
 export type PaymentStatus = 'active' | 'reversed';
+export type ExpenseStatus = 'active' | 'reversed';
 
 export type ClientRow = {
   id: string;
@@ -56,6 +57,18 @@ export type PaymentRow = {
   reversed_at: string | null;
 };
 
+export type ExpenseRow = {
+  id: string;
+  description: string;
+  amount_cents: number;
+  expense_date: string;
+  category: string;
+  client_operation_id: string;
+  status: ExpenseStatus;
+  created_at: string;
+  reversed_at: string | null;
+};
+
 export type ClientRecord = {
   id: string;
   name: string;
@@ -106,6 +119,18 @@ export type PaymentRecord = {
   method: string;
   clientOperationId: string;
   status: PaymentStatus;
+  createdAt: string;
+  reversedAt: string | null;
+};
+
+export type ExpenseRecord = {
+  id: string;
+  description: string;
+  amountCents: number;
+  expenseDate: string;
+  category: string;
+  clientOperationId: string;
+  status: ExpenseStatus;
   createdAt: string;
   reversedAt: string | null;
 };

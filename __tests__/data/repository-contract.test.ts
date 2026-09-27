@@ -3,6 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { createSqliteRepositories } from '@/data/database';
 import type {
   ClientRow,
+  ExpenseRow,
   PaymentRow,
   QuoteItemRow,
   QuoteRow,
@@ -15,6 +16,7 @@ type FakeState = {
   quoteItems: QuoteItemRow[];
   services: ServiceRow[];
   payments: PaymentRow[];
+  expenses: ExpenseRow[];
 };
 
 type FakeDatabase = {
@@ -85,6 +87,18 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
           string,
         ];
         state.payments.push({ id, service_id: serviceId, amount_cents: amountCents, payment_date: paymentDate, method, client_operation_id: clientOperationId, status, created_at: createdAt, reversed_at: null });
+      } else if (sql.includes('INSERT INTO expenses')) {
+        const [id, description, amountCents, expenseDate, category, clientOperationId, status, createdAt] = params as [
+          string,
+          string,
+          number,
+          string,
+          string,
+          string,
+          ExpenseRow['status'],
+          string,
+        ];
+        state.expenses.push({ id, description, amount_cents: amountCents, expense_date: expenseDate, category, client_operation_id: clientOperationId, status, created_at: createdAt, reversed_at: null });
       }
       return { changes: 1, lastInsertRowId: 1 };
     }),
@@ -96,6 +110,7 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
       if (sql.includes('FROM services WHERE quote_id')) return state.services.find((row) => row.quote_id === value) ?? null;
       if (sql.includes('FROM services WHERE id')) return state.services.find((row) => row.id === value) ?? null;
       if (sql.includes('FROM payments WHERE client_operation_id')) return state.payments.find((row) => row.client_operation_id === value) ?? null;
+      if (sql.includes('FROM expenses WHERE client_operation_id')) return state.expenses.find((row) => row.client_operation_id === value) ?? null;
       if (sql.includes('SELECT total_cents FROM services')) return state.services.find((row) => row.id === value) ?? null;
       if (sql.includes('COALESCE(SUM(amount_cents)')) {
         const activePayments = state.payments.filter((row) => row.service_id === value && row.status === 'active');
@@ -108,6 +123,7 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
       if (sql.includes('FROM clients')) return state.clients;
       if (sql.includes('FROM quote_items')) return state.quoteItems.filter((row) => row.quote_id === value);
       if (sql.includes('FROM payments')) return state.payments.filter((row) => row.service_id === value);
+      if (sql.includes('FROM expenses')) return state.expenses;
       return [];
     }),
     withExclusiveTransactionAsync: jest.fn(async (callback: (transaction: FakeDatabase) => Promise<void>) => callback(database)),
@@ -118,7 +134,7 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
 
 describe('SQLite repository contracts', () => {
   it('persists clients, quotes, services and idempotent payments', async () => {
-    const state: FakeState = { clients: [], quotes: [], quoteItems: [], services: [], payments: [] };
+    const state: FakeState = { clients: [], quotes: [], quoteItems: [], services: [], payments: [], expenses: [] };
     const repositories = createSqliteRepositories(createFakeDatabase(state));
 
     await repositories.clients.create({
@@ -173,5 +189,20 @@ describe('SQLite repository contracts', () => {
     const repeatedPayment = await repositories.payments.create(paymentInput);
     expect(repeatedPayment.id).toBe(firstPayment.id);
     expect(state.payments).toHaveLength(1);
+
+    const expenseInput = {
+      id: 'expense-1',
+      description: 'Material',
+      amountCents: 7000,
+      expenseDate: '2026-09-27',
+      category: 'material',
+      clientOperationId: 'expense-operation-1',
+      status: 'active' as const,
+      createdAt: '2026-09-27T12:00:00.000Z',
+    };
+    const firstExpense = await repositories.expenses.create(expenseInput);
+    const repeatedExpense = await repositories.expenses.create(expenseInput);
+    expect(repeatedExpense.id).toBe(firstExpense.id);
+    expect(state.expenses).toHaveLength(1);
   });
 });

@@ -5,12 +5,14 @@ import { calculateBalance, validatePaymentAmount } from '@/domain/payment';
 import type {
   ClientRepository,
   CreateClientInput,
+  CreateExpenseInput,
   CreatePaymentInput,
   CreateQuoteInput,
   CreateServiceInput,
   GiroaRepositories,
   OperationContext,
   PaymentRepository,
+  ExpenseRepository,
   QuoteRepository,
   ServiceRepository,
   TransactionPort,
@@ -18,6 +20,8 @@ import type {
 import type {
   ClientRecord,
   ClientRow,
+  ExpenseRecord,
+  ExpenseRow,
   PaymentRecord,
   PaymentRow,
   QuoteItemRecord,
@@ -86,6 +90,20 @@ function mapPayment(row: PaymentRow): PaymentRecord {
     amountCents: row.amount_cents,
     paymentDate: row.payment_date,
     method: row.method,
+    clientOperationId: row.client_operation_id,
+    status: row.status,
+    createdAt: row.created_at,
+    reversedAt: row.reversed_at,
+  };
+}
+
+function mapExpense(row: ExpenseRow): ExpenseRecord {
+  return {
+    id: row.id,
+    description: row.description,
+    amountCents: row.amount_cents,
+    expenseDate: row.expense_date,
+    category: row.category,
     clientOperationId: row.client_operation_id,
     status: row.status,
     createdAt: row.created_at,
@@ -270,9 +288,78 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       const rows = await db.getAllAsync<PaymentRow>('SELECT * FROM payments ORDER BY payment_date, created_at');
       return rows.map(mapPayment);
     },
+    async reverse(id: string, reversedAt: string): Promise<PaymentRecord> {
+      return transactions.withExclusive({}, async () => {
+        const existing = await db.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
+        if (!existing) throw new Error('Recebimento não encontrado.');
+        if (existing.status === 'reversed') return mapPayment(existing);
+
+        await db.runAsync(
+          "UPDATE payments SET status = 'reversed', reversed_at = ? WHERE id = ? AND status = 'active'",
+          reversedAt,
+          id,
+        );
+        const updated = await db.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
+        if (!updated) throw new Error('Recebimento não encontrado.');
+        return mapPayment(updated);
+      });
+    },
   };
 
-  return { clients, quotes, services, payments, transactions };
+  const expenses: ExpenseRepository = {
+    async create(input: CreateExpenseInput): Promise<ExpenseRecord> {
+      return transactions.withExclusive({ clientOperationId: input.clientOperationId }, async () => {
+        const existing = await db.getFirstAsync<ExpenseRow>(
+          'SELECT * FROM expenses WHERE client_operation_id = ?',
+          input.clientOperationId,
+        );
+        if (existing) return mapExpense(existing);
+
+        await db.runAsync(
+          `INSERT INTO expenses (id, description, amount_cents, expense_date, category, client_operation_id, status, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          input.id,
+          input.description,
+          input.amountCents,
+          input.expenseDate,
+          input.category,
+          input.clientOperationId,
+          input.status,
+          input.createdAt,
+        );
+        return { ...input, reversedAt: null };
+      });
+    },
+    async getByOperationId(clientOperationId: string): Promise<ExpenseRecord | null> {
+      const row = await db.getFirstAsync<ExpenseRow>(
+        'SELECT * FROM expenses WHERE client_operation_id = ?',
+        clientOperationId,
+      );
+      return row ? mapExpense(row) : null;
+    },
+    async listAll(): Promise<ExpenseRecord[]> {
+      const rows = await db.getAllAsync<ExpenseRow>('SELECT * FROM expenses ORDER BY expense_date, created_at');
+      return rows.map(mapExpense);
+    },
+    async reverse(id: string, reversedAt: string): Promise<ExpenseRecord> {
+      return transactions.withExclusive({}, async () => {
+        const existing = await db.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
+        if (!existing) throw new Error('Despesa não encontrada.');
+        if (existing.status === 'reversed') return mapExpense(existing);
+
+        await db.runAsync(
+          "UPDATE expenses SET status = 'reversed', reversed_at = ? WHERE id = ? AND status = 'active'",
+          reversedAt,
+          id,
+        );
+        const updated = await db.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
+        if (!updated) throw new Error('Despesa não encontrada.');
+        return mapExpense(updated);
+      });
+    },
+  };
+
+  return { clients, quotes, services, payments, expenses, transactions };
 }
 
 export async function openGiroaDatabase(): Promise<SQLiteDatabase> {
