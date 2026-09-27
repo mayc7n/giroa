@@ -120,4 +120,16 @@ describe('payment use cases', () => {
     })).resolves.toEqual(existing);
     expect(paymentRepository.create).not.toHaveBeenCalled();
   });
+
+  it('filters the cash balance by the requested civil period', async () => {
+    const inPeriod = makePayment('payment-1', 30000, 'operation-1');
+    const previousPeriod = { ...makePayment('payment-2', 5000, 'operation-2'), paymentDate: '2026-08-31' };
+    const { useCases } = makeUseCases([inPeriod, previousPeriod]);
+
+    await expect(useCases.getCashSummary({ startDate: '2026-09-01', endDate: '2026-09-30' })).resolves.toMatchObject({
+      entriesCents: 30000,
+      periodBalanceCents: 30000,
+      pendingCents: 50000,
+    });
+  });
 });

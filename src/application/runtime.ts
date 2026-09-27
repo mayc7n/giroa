@@ -18,3 +18,13 @@ export function currentCivilDate(): string {
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   return `${values.year}-${values.month}-${values.day}`;
 }
+
+export function currentCivilMonthPeriod(): { startDate: string; endDate: string } {
+  const currentDate = currentCivilDate();
+  const [year, month] = currentDate.split('-').map(Number);
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return {
+    startDate: `${currentDate.slice(0, 7)}-01`,
+    endDate: `${currentDate.slice(0, 7)}-${String(lastDay).padStart(2, '0')}`,
+  };
+}

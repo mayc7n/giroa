@@ -70,10 +70,18 @@ export function createPaymentUseCases({ services, payments, idFactory, clock }: 
         balanceCents: calculateBalance(service.totalCents, currentPayments),
       };
     },
-    async getCashSummary() {
+    async getCashSummary(period: { startDate: string; endDate: string }) {
+      assertISODate(period.startDate);
+      assertISODate(period.endDate);
+      if (period.startDate > period.endDate) throw new Error('O período do caixa é inválido.');
+
       const allServices = await services.list();
       const allPayments = await payments.listAll();
-      const activePayments = allPayments.filter((payment) => payment.status === 'active');
+      const activePayments = allPayments.filter((payment) => (
+        payment.status === 'active'
+        && payment.paymentDate >= period.startDate
+        && payment.paymentDate <= period.endDate
+      ));
       const pendingCents = allServices.reduce((total, service) => {
         const servicePayments = allPayments.filter((payment) => payment.serviceId === service.id);
         return total + calculateBalance(service.totalCents, servicePayments);

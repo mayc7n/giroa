@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { createPaymentUseCases } from '@/application/paymentUseCases';
-import { createRuntimeId, currentInstant } from '@/application/runtime';
+import { createRuntimeId, currentCivilMonthPeriod, currentInstant } from '@/application/runtime';
 import { createSqliteRepositories } from '@/data/database';
 import { formatCentsToBRL } from '@/domain/money';
 
@@ -21,7 +21,7 @@ export default function CashScreen() {
 
   useEffect(() => {
     let active = true;
-    paymentUseCases.getCashSummary()
+    paymentUseCases.getCashSummary(currentCivilMonthPeriod())
       .then((nextSummary) => {
         if (active) setSummary(nextSummary);
       })
