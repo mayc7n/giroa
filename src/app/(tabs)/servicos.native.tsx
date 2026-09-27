@@ -12,6 +12,7 @@ import PaymentForm from '@/features/payments/PaymentForm';
 import QuoteDetail from '@/features/quotes/QuoteDetail';
 import QuoteForm from '@/features/quotes/QuoteForm';
 import ServiceDetail from '@/features/services/ServiceDetail';
+import ServiceList from '@/features/services/ServiceList';
 import type { ServiceFinancialSummary } from '@/application/paymentUseCases';
 import type { ServiceRecord } from '@/data/sqliteTypes';
 
@@ -37,15 +38,31 @@ export default function ServicesScreen() {
     clock: currentInstant,
   }), [repositories.payments, repositories.services]);
   const [clients, setClients] = useState<Awaited<ReturnType<typeof repositories.clients.list>>>([]);
+  const [savedServices, setSavedServices] = useState<ServiceRecord[]>([]);
   const [quote, setQuote] = useState<Awaited<ReturnType<typeof repositories.quotes.getById>>>(null);
   const [service, setService] = useState<ServiceRecord | null>(null);
   const [summary, setSummary] = useState<ServiceFinancialSummary | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showNewQuote, setShowNewQuote] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void repositories.clients.list().then(setClients).catch(() => setError('Não foi possível carregar os clientes.'));
-  }, [repositories.clients]);
+    let active = true;
+    Promise.all([repositories.clients.list(), repositories.services.list()])
+      .then(([nextClients, nextServices]) => {
+        if (!active) return;
+        setClients(nextClients);
+        setSavedServices(nextServices);
+        setError(null);
+      })
+      .catch(() => {
+        if (active) setError('Não foi possível carregar os serviços. Tente novamente.');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [repositories.clients, repositories.services]);
 
   async function loadServiceSummary(serviceId: string) {
     const nextSummary = await paymentUseCases.getServiceFinancialSummary(serviceId);
@@ -56,7 +73,7 @@ export default function ServicesScreen() {
     if (showPaymentForm) {
       return (
         <View style={styles.screen}>
-          <Pressable accessibilityRole="button" onPress={() => setShowPaymentForm(false)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => setShowPaymentForm(false)} style={styles.backButton}>
             <Text style={styles.backText}>Voltar para o serviço</Text>
           </Pressable>
           <PaymentForm
@@ -73,10 +90,10 @@ export default function ServicesScreen() {
 
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => setService(null)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => { setService(null); setSummary(null); }} style={styles.backButton}>
           <Text style={styles.backText}>Voltar para orçamentos</Text>
         </Pressable>
-        <ServiceDetail service={service} summary={summary} onRegisterPayment={() => setShowPaymentForm(true)} />
+        <ServiceDetail service={service} summary={summary} payments={summary.payments} onRegisterPayment={() => setShowPaymentForm(true)} />
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       </View>
     );
@@ -85,7 +102,7 @@ export default function ServicesScreen() {
   if (quote) {
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => setQuote(null)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => { setQuote(null); setShowNewQuote(false); }} style={styles.backButton}>
           <Text style={styles.backText}>Novo orçamento</Text>
         </Pressable>
         <QuoteDetail
@@ -98,13 +115,44 @@ export default function ServicesScreen() {
             try {
               setError(null);
               const createdService = await serviceUseCases.createFromApprovedQuote(quote.id);
+              setSavedServices((currentServices) => [
+                createdService,
+                ...currentServices.filter((currentService) => currentService.id !== createdService.id),
+              ]);
               setService(createdService);
               await loadServiceSummary(createdService.id);
               setQuote(null);
+              setShowNewQuote(false);
             } catch (serviceError) {
               setError(serviceError instanceof Error ? serviceError.message : 'Não foi possível criar o serviço.');
             }
           }}
+        />
+        {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+      </View>
+    );
+  }
+
+  if (!showNewQuote && savedServices.length > 0) {
+    return (
+      <View style={styles.screen}>
+        <ServiceList
+          services={savedServices.map((savedService) => ({
+            service: savedService,
+            clientName: clients.find((client) => client.id === savedService.clientId)?.name ?? 'Cliente não identificado',
+          }))}
+          onSelect={async (selectedService) => {
+            try {
+              setError(null);
+              setSummary(null);
+              setService(selectedService);
+              await loadServiceSummary(selectedService.id);
+            } catch (serviceError) {
+              setService(null);
+              setError(serviceError instanceof Error ? serviceError.message : 'Não foi possível abrir o serviço.');
+            }
+          }}
+          onCreateQuote={() => setShowNewQuote(true)}
         />
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       </View>
@@ -121,19 +169,27 @@ export default function ServicesScreen() {
   }
 
   return (
-    <QuoteForm
-      clients={clients}
-      onSubmit={async (input) => {
-        setError(null);
-        try {
-          const created = await useCases.create(input);
-          setQuote(created);
-        } catch (submissionError) {
-          setError(submissionError instanceof Error ? submissionError.message : 'Não foi possível criar o orçamento.');
-          throw submissionError;
-        }
-      }}
-    />
+    <View style={styles.screen}>
+      {savedServices.length > 0 ? (
+        <Pressable accessibilityRole="button" onPress={() => setShowNewQuote(false)} style={styles.backButton}>
+          <Text style={styles.backText}>Voltar para serviços salvos</Text>
+        </Pressable>
+      ) : null}
+      <QuoteForm
+        clients={clients}
+        onSubmit={async (input) => {
+          setError(null);
+          try {
+            const created = await useCases.create(input);
+            setQuote(created);
+          } catch (submissionError) {
+            setError(submissionError instanceof Error ? submissionError.message : 'Não foi possível criar o orçamento.');
+            throw submissionError;
+          }
+        }}
+      />
+      {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
+    </View>
   );
 }
 
