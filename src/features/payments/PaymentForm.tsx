@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { createRuntimeId, currentCivilDate } from '@/application/runtime';
+import { formatISODateToBR, parseBRDateToISO } from '@/domain/date';
 import { formatCentsToBRL, parseMoneyToCents } from '@/domain/money';
 
 type PaymentFormProps = {
@@ -22,7 +23,7 @@ const methods = [
 
 export default function PaymentForm({ balanceCents, onSubmit }: PaymentFormProps) {
   const [amount, setAmount] = useState('');
-  const [paymentDate, setPaymentDate] = useState(currentCivilDate());
+  const [paymentDate, setPaymentDate] = useState(formatISODateToBR(currentCivilDate()));
   const [method, setMethod] = useState('pix');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export default function PaymentForm({ balanceCents, onSubmit }: PaymentFormProps
       operationIdRef.current = operationId;
       await onSubmit({
         amountCents,
-        paymentDate: paymentDate.trim(),
+        paymentDate: parseBRDateToISO(paymentDate),
         method,
         clientOperationId: operationId,
       });
@@ -75,7 +76,7 @@ export default function PaymentForm({ balanceCents, onSubmit }: PaymentFormProps
             accessibilityLabel="Data do recebimento"
             keyboardType="numbers-and-punctuation"
             onChangeText={setPaymentDate}
-            placeholder="AAAA-MM-DD"
+            placeholder="DD/MM/AAAA"
             style={styles.input}
             value={paymentDate}
           />

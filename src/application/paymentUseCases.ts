@@ -1,4 +1,5 @@
 import { calculateBalance, validatePaymentAmount } from '@/domain/payment';
+import { assertISODate } from '@/domain/date';
 import type { PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
 import type { PaymentRepository, ServiceRepository } from './ports';
 
@@ -31,6 +32,8 @@ export function createPaymentUseCases({ services, payments, idFactory, clock }: 
 
       const existing = await payments.getByOperationId(operationId);
       if (existing) return existing;
+
+      assertISODate(input.paymentDate);
 
       const service = await services.getById(input.serviceId);
       if (!service) throw new Error('Serviço não encontrado.');
