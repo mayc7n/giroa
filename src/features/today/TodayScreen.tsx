@@ -1,7 +1,12 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { ReactNode } from 'react';
 
-export default function TodayScreen() {
+type TodayScreenProps = {
+  footer?: ReactNode;
+};
+
+export default function TodayScreen({ footer }: TodayScreenProps = {}) {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -17,6 +22,7 @@ export default function TodayScreen() {
             Cadastre um cliente ou registre um serviço para começar.
           </Text>
         </View>
+        {footer}
       </ScrollView>
     </SafeAreaView>
   );
