@@ -7,6 +7,7 @@ type QuoteDetailProps = {
   quote: QuoteRecord;
   onApprove: () => void;
   onCreateService?: () => void;
+  onShareQuote?: () => void;
 };
 
 const statusLabels: Record<QuoteRecord['status'], string> = {
@@ -17,7 +18,7 @@ const statusLabels: Record<QuoteRecord['status'], string> = {
   cancelled: 'Cancelado',
 };
 
-export default function QuoteDetail({ quote, onApprove, onCreateService }: QuoteDetailProps) {
+export default function QuoteDetail({ quote, onApprove, onCreateService, onShareQuote }: QuoteDetailProps) {
   return (
     <View style={styles.content}>
       <Text style={styles.title}>{quote.description}</Text>
@@ -34,6 +35,11 @@ export default function QuoteDetail({ quote, onApprove, onCreateService }: Quote
       {quote.status === 'approved' && onCreateService ? (
         <Pressable accessibilityRole="button" onPress={onCreateService} style={styles.secondaryButton}>
           <Text style={styles.secondaryButtonText}>Criar serviço</Text>
+        </Pressable>
+      ) : null}
+      {onShareQuote ? (
+        <Pressable accessibilityRole="button" onPress={onShareQuote} style={styles.secondaryButton}>
+          <Text style={styles.secondaryButtonText}>Compartilhar orçamento</Text>
         </Pressable>
       ) : null}
     </View>

@@ -29,12 +29,13 @@ const payment: PaymentRecord = {
 
 describe('service detail', () => {
   it('shows total, received and pending balance without misleading labels', () => {
-    const { getByText, queryByText } = render(
+    const { getByText, getByRole, queryByText } = render(
       <ServiceDetail
         service={service}
         summary={{ totalCents: 85000, receivedCents: 30000, balanceCents: 55000 }}
         payments={[payment]}
         onRegisterPayment={jest.fn()}
+        onShareReceipt={jest.fn()}
       />,
     );
 
@@ -44,6 +45,7 @@ describe('service detail', () => {
     expect(getByText('Histórico de recebimentos')).toBeTruthy();
     expect(getByText('27/09/2026 · Pix')).toBeTruthy();
     expect(getByText('R$ 300,00')).toBeTruthy();
+    expect(getByRole('button', { name: 'Compartilhar recibo' })).toBeTruthy();
     expect(queryByText(/lucro líquido|saldo bancário/i)).toBeNull();
   });
 });

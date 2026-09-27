@@ -11,6 +11,7 @@ type ServiceDetailProps = {
   summary: Pick<ServiceFinancialSummary, 'totalCents' | 'receivedCents' | 'balanceCents'>;
   payments: PaymentRecord[];
   onRegisterPayment: () => void;
+  onShareReceipt?: (payment: PaymentRecord) => void;
 };
 
 const workStatusLabels: Record<ServiceRecord['workStatus'], string> = {
@@ -34,7 +35,7 @@ function formatPaymentDate(value: string): string {
   }
 }
 
-export default function ServiceDetail({ service, summary, payments, onRegisterPayment }: ServiceDetailProps) {
+export default function ServiceDetail({ service, summary, payments, onRegisterPayment, onShareReceipt }: ServiceDetailProps) {
   return (
     <View style={styles.content}>
       <Text style={styles.title}>{service.description}</Text>
@@ -64,6 +65,11 @@ export default function ServiceDetail({ service, summary, payments, onRegisterPa
               {formatPaymentDate(payment.paymentDate)} · {payment.status === 'reversed' ? 'Estornado' : paymentMethodLabels[payment.method] ?? payment.method}
             </Text>
             <Text style={styles.paymentAmount}>{formatCentsToBRL(payment.amountCents)}</Text>
+            {payment.status === 'active' && onShareReceipt ? (
+              <Pressable accessibilityRole="button" onPress={() => onShareReceipt(payment)}>
+                <Text style={styles.receiptLink}>Compartilhar recibo</Text>
+              </Pressable>
+            ) : null}
           </View>
         ))}
       </View>
@@ -89,4 +95,5 @@ const styles = StyleSheet.create({
   paymentRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#C7D0CC' },
   paymentDescription: { flex: 1, color: '#4A5753', fontSize: 15 },
   paymentAmount: { color: '#173C35', fontSize: 15, fontWeight: '800' },
+  receiptLink: { color: '#0B776D', fontSize: 14, fontWeight: '800' },
 });

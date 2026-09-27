@@ -18,10 +18,11 @@ describe('quote UI', () => {
       updatedAt: '2026-09-27T12:00:00.000Z',
     };
 
-    const { getByText, getByRole } = render(<QuoteDetail quote={quote} onApprove={jest.fn()} />);
+    const { getByText, getByRole } = render(<QuoteDetail quote={quote} onApprove={jest.fn()} onShareQuote={jest.fn()} />);
 
     expect(getByText('Total R$ 850,00')).toBeTruthy();
     expect(getByText('Rascunho')).toBeTruthy();
     expect(getByRole('button', { name: 'Aprovar orçamento' })).toBeTruthy();
+    expect(getByRole('button', { name: 'Compartilhar orçamento' })).toBeTruthy();
   });
 });

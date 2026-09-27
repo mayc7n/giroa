@@ -9,6 +9,8 @@ import { createServiceUseCases } from '@/application/serviceUseCases';
 import { createSqliteRepositories } from '@/data/database';
 import AreaPlaceholder from '@/features/shared/AreaPlaceholder';
 import PaymentForm from '@/features/payments/PaymentForm';
+import { buildQuotePdfHtml, buildReceiptPdfHtml } from '@/features/documents/pdfContent';
+import { sharePdf } from '@/features/documents/sharePdf';
 import QuoteDetail from '@/features/quotes/QuoteDetail';
 import QuoteForm from '@/features/quotes/QuoteForm';
 import ServiceDetail from '@/features/services/ServiceDetail';
@@ -93,7 +95,27 @@ export default function ServicesScreen() {
         <Pressable accessibilityRole="button" onPress={() => { setService(null); setSummary(null); }} style={styles.backButton}>
           <Text style={styles.backText}>Voltar para orçamentos</Text>
         </Pressable>
-        <ServiceDetail service={service} summary={summary} payments={summary.payments} onRegisterPayment={() => setShowPaymentForm(true)} />
+        <ServiceDetail
+          service={service}
+          summary={summary}
+          payments={summary.payments}
+          onRegisterPayment={() => setShowPaymentForm(true)}
+          onShareReceipt={async (payment) => {
+            try {
+              setError(null);
+              const client = clients.find((item) => item.id === service.clientId);
+              await sharePdf('Compartilhar recibo', buildReceiptPdfHtml({
+                clientName: client?.name ?? 'Cliente não identificado',
+                serviceDescription: service.description,
+                payment,
+                serviceTotalCents: summary.totalCents,
+                balanceCents: summary.balanceCents,
+              }));
+            } catch (documentError) {
+              setError(documentError instanceof Error ? documentError.message : 'Não foi possível gerar o recibo.');
+            }
+          }}
+        />
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       </View>
     );
@@ -125,6 +147,19 @@ export default function ServicesScreen() {
               setShowNewQuote(false);
             } catch (serviceError) {
               setError(serviceError instanceof Error ? serviceError.message : 'Não foi possível criar o serviço.');
+            }
+          }}
+          onShareQuote={async () => {
+            try {
+              setError(null);
+              const client = clients.find((item) => item.id === quote.clientId);
+              await sharePdf('Compartilhar orçamento', buildQuotePdfHtml({
+                quote,
+                clientName: client?.name ?? 'Cliente não identificado',
+                clientContact: client?.contact,
+              }));
+            } catch (documentError) {
+              setError(documentError instanceof Error ? documentError.message : 'Não foi possível gerar o orçamento.');
             }
           }}
         />
