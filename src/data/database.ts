@@ -209,6 +209,10 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       const row = await db.getFirstAsync<ServiceRow>('SELECT * FROM services WHERE quote_id = ?', quoteId);
       return row ? mapService(row) : null;
     },
+    async list(): Promise<ServiceRecord[]> {
+      const rows = await db.getAllAsync<ServiceRow>('SELECT * FROM services ORDER BY created_at, id');
+      return rows.map(mapService);
+    },
   };
 
   const payments: PaymentRepository = {
@@ -260,6 +264,10 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
     },
     async listByServiceId(serviceId: string): Promise<PaymentRecord[]> {
       const rows = await db.getAllAsync<PaymentRow>('SELECT * FROM payments WHERE service_id = ? ORDER BY payment_date, created_at', serviceId);
+      return rows.map(mapPayment);
+    },
+    async listAll(): Promise<PaymentRecord[]> {
+      const rows = await db.getAllAsync<PaymentRow>('SELECT * FROM payments ORDER BY payment_date, created_at');
       return rows.map(mapPayment);
     },
   };

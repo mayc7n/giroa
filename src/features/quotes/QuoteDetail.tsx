@@ -6,6 +6,7 @@ import type { QuoteRecord } from '@/data/sqliteTypes';
 type QuoteDetailProps = {
   quote: QuoteRecord;
   onApprove: () => void;
+  onCreateService?: () => void;
 };
 
 const statusLabels: Record<QuoteRecord['status'], string> = {
@@ -16,7 +17,7 @@ const statusLabels: Record<QuoteRecord['status'], string> = {
   cancelled: 'Cancelado',
 };
 
-export default function QuoteDetail({ quote, onApprove }: QuoteDetailProps) {
+export default function QuoteDetail({ quote, onApprove, onCreateService }: QuoteDetailProps) {
   return (
     <View style={styles.content}>
       <Text style={styles.title}>{quote.description}</Text>
@@ -28,6 +29,11 @@ export default function QuoteDetail({ quote, onApprove }: QuoteDetailProps) {
       {quote.status === 'draft' || quote.status === 'sent' ? (
         <Pressable accessibilityRole="button" onPress={onApprove} style={styles.button}>
           <Text style={styles.buttonText}>Aprovar orçamento</Text>
+        </Pressable>
+      ) : null}
+      {quote.status === 'approved' && onCreateService ? (
+        <Pressable accessibilityRole="button" onPress={onCreateService} style={styles.secondaryButton}>
+          <Text style={styles.secondaryButtonText}>Criar serviço</Text>
         </Pressable>
       ) : null}
     </View>
@@ -43,4 +49,6 @@ const styles = StyleSheet.create({
   total: { color: '#173C35', fontSize: 22, fontWeight: '800' },
   button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  secondaryButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderColor: '#0B776D', paddingHorizontal: 18 },
+  secondaryButtonText: { color: '#0B776D', fontSize: 16, fontWeight: '800' },
 });

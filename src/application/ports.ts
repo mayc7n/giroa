@@ -67,12 +67,14 @@ export interface ServiceRepository {
   createFromApprovedQuote(input: CreateServiceInput): Promise<ServiceRecord>;
   getById(id: string): Promise<ServiceRecord | null>;
   getByQuoteId(quoteId: string): Promise<ServiceRecord | null>;
+  list(): Promise<ServiceRecord[]>;
 }
 
 export interface PaymentRepository {
   create(input: CreatePaymentInput): Promise<PaymentRecord>;
   getByOperationId(clientOperationId: string): Promise<PaymentRecord | null>;
   listByServiceId(serviceId: string): Promise<PaymentRecord[]>;
+  listAll(): Promise<PaymentRecord[]>;
 }
 
 export type GiroaRepositories = {
