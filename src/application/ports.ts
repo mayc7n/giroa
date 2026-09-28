@@ -8,6 +8,7 @@ import type {
   WorkStatus,
 } from '@/data/sqliteTypes';
 import type { ClientSummary } from '@/domain/types';
+import type { SQLiteDatabase } from 'expo-sqlite';
 
 export type CreateClientInput = {
   id: string;
@@ -60,7 +61,7 @@ export type OperationContext = {
 };
 
 export interface TransactionPort {
-  withExclusive<T>(operation: OperationContext, work: () => Promise<T>): Promise<T>;
+  withExclusive<T>(operation: OperationContext, work: (transaction: SQLiteDatabase) => Promise<T>): Promise<T>;
 }
 
 export interface ClientRepository {

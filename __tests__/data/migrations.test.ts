@@ -44,4 +44,19 @@ describe('Giroa database migrations', () => {
     expect(executedSql.join('\n')).toContain('CREATE TABLE IF NOT EXISTS expenses');
     expect(executedSql.join('\n')).toContain(`PRAGMA user_version = ${DATABASE_VERSION}`);
   });
+
+  it('repairs the expenses table when a version two database is incomplete', async () => {
+    const executedSql: string[] = [];
+    const db = {
+      getFirstAsync: jest.fn().mockResolvedValue({ user_version: DATABASE_VERSION }),
+      execAsync: jest.fn(async (sql: string) => {
+        executedSql.push(sql);
+      }),
+      withTransactionAsync: jest.fn(async (callback: () => Promise<void>) => callback()),
+    } as unknown as SQLiteDatabase;
+
+    await migrateDatabase(db);
+
+    expect(executedSql.join('\n')).toContain('CREATE TABLE IF NOT EXISTS expenses');
+  });
 });

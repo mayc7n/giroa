@@ -85,6 +85,9 @@ export async function migrateDatabase(db: SQLiteDatabase): Promise<void> {
   let currentVersion = versionRow?.user_version ?? 0;
 
   if (currentVersion >= DATABASE_VERSION) {
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(EXPENSES_MIGRATION_SQL);
+    });
     return;
   }
 

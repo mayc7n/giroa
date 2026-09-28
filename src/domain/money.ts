@@ -1,4 +1,5 @@
 const BRAZILIAN_MONEY_PATTERN = /^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/;
+const DECIMAL_MONEY_PATTERN = /^\d+(?:\.\d{1,2})?$/;
 
 function assertNonNegativeCents(cents: number): void {
   if (!Number.isSafeInteger(cents) || cents < 0) {
@@ -9,11 +10,25 @@ function assertNonNegativeCents(cents: number): void {
 export function parseMoneyToCents(input: string): number {
   const value = input.trim().replace(/^R\$\s*/i, '');
 
-  if (!value || !BRAZILIAN_MONEY_PATTERN.test(value)) {
+  if (!value) {
     throw new Error('Informe um valor em reais com até duas casas decimais.');
   }
 
-  const [integerPart, decimalPart = ''] = value.split(',');
+  let integerPart: string;
+  let decimalPart = '';
+  if (value.includes(',')) {
+    if (!BRAZILIAN_MONEY_PATTERN.test(value)) {
+      throw new Error('Informe um valor em reais com até duas casas decimais.');
+    }
+    [integerPart, decimalPart = ''] = value.split(',');
+  } else if (DECIMAL_MONEY_PATTERN.test(value)) {
+    [integerPart, decimalPart = ''] = value.split('.');
+  } else if (BRAZILIAN_MONEY_PATTERN.test(value)) {
+    integerPart = value;
+  } else {
+    throw new Error('Informe um valor em reais com até duas casas decimais.');
+  }
+
   const integerDigits = integerPart.replaceAll('.', '');
   const cents = Number(`${integerDigits}${decimalPart.padEnd(2, '0')}`);
 

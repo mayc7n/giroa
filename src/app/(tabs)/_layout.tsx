@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 
 import { colors } from '@/ui/tokens';
+import { tabBarIcon } from '@/ui/tabBar';
 
 export default function TabsLayout() {
   return (
@@ -16,10 +17,11 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen name="hoje" options={{ title: 'Hoje' }} />
-      <Tabs.Screen name="servicos" options={{ title: 'Serviços' }} />
-      <Tabs.Screen name="caixa" options={{ title: 'Caixa' }} />
-      <Tabs.Screen name="clientes" options={{ title: 'Clientes' }} />
+      <Tabs.Screen name="hoje" options={{ title: 'Hoje', tabBarIcon: tabBarIcon('hoje') }} />
+      <Tabs.Screen name="servicos" options={{ title: 'Serviços', tabBarIcon: tabBarIcon('servicos') }} />
+      <Tabs.Screen name="caixa" options={{ title: 'Caixa', tabBarIcon: tabBarIcon('caixa') }} />
+      <Tabs.Screen name="clientes" options={{ title: 'Clientes', tabBarIcon: tabBarIcon('clientes') }} />
+      <Tabs.Screen name="dados" options={{ title: 'Dados', tabBarIcon: tabBarIcon('dados') }} />
     </Tabs>
   );
 }

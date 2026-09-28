@@ -113,10 +113,10 @@ function mapExpense(row: ExpenseRow): ExpenseRecord {
 
 function createTransactionPort(db: SQLiteDatabase): TransactionPort {
   return {
-    async withExclusive<T>(_operation: OperationContext, work: () => Promise<T>): Promise<T> {
+    async withExclusive<T>(_operation: OperationContext, work: (transaction: SQLiteDatabase) => Promise<T>): Promise<T> {
       let result!: T;
-      await db.withExclusiveTransactionAsync(async () => {
-        result = await work();
+      await db.withExclusiveTransactionAsync(async (transaction) => {
+        result = await work(transaction);
       });
       return result;
     },
@@ -152,8 +152,8 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
 
   const quotes: QuoteRepository = {
     async create(input: CreateQuoteInput): Promise<QuoteRecord> {
-      await transactions.withExclusive({}, async () => {
-        await db.runAsync(
+      await transactions.withExclusive({}, async (transaction) => {
+        await transaction.runAsync(
           `INSERT INTO quotes (id, client_id, description, discount_cents, valid_until, status, total_cents, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           input.id,
@@ -167,7 +167,7 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
           input.updatedAt,
         );
         for (const item of input.items) {
-          await db.runAsync(
+          await transaction.runAsync(
             `INSERT INTO quote_items (id, quote_id, description, quantity_milli, unit_price_cents, total_cents, position)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             item.id,
@@ -195,16 +195,16 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
 
   const services: ServiceRepository = {
     async createFromApprovedQuote(input: CreateServiceInput): Promise<ServiceRecord> {
-      return transactions.withExclusive({}, async () => {
-        const existing = await db.getFirstAsync<ServiceRow>('SELECT * FROM services WHERE quote_id = ?', input.quoteId);
+      return transactions.withExclusive({}, async (transaction) => {
+        const existing = await transaction.getFirstAsync<ServiceRow>('SELECT * FROM services WHERE quote_id = ?', input.quoteId);
         if (existing) return mapService(existing);
 
-        const quote = await db.getFirstAsync<Pick<QuoteRow, 'status'>>('SELECT status FROM quotes WHERE id = ?', input.quoteId);
+        const quote = await transaction.getFirstAsync<Pick<QuoteRow, 'status'>>('SELECT status FROM quotes WHERE id = ?', input.quoteId);
         if (!quote || quote.status !== 'approved') {
           throw new Error('Somente orçamentos aprovados podem virar serviços.');
         }
 
-        await db.runAsync(
+        await transaction.runAsync(
           `INSERT INTO services (id, client_id, quote_id, description, total_cents, work_status, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           input.id,
@@ -235,20 +235,20 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
 
   const payments: PaymentRepository = {
     async create(input: CreatePaymentInput): Promise<PaymentRecord> {
-      return transactions.withExclusive({ clientOperationId: input.clientOperationId }, async () => {
-        const existing = await db.getFirstAsync<PaymentRow>(
+      return transactions.withExclusive({ clientOperationId: input.clientOperationId }, async (transaction) => {
+        const existing = await transaction.getFirstAsync<PaymentRow>(
           'SELECT * FROM payments WHERE client_operation_id = ?',
           input.clientOperationId,
         );
         if (existing) return mapPayment(existing);
 
-        const service = await db.getFirstAsync<Pick<ServiceRow, 'total_cents'>>(
+        const service = await transaction.getFirstAsync<Pick<ServiceRow, 'total_cents'>>(
           'SELECT total_cents FROM services WHERE id = ?',
           input.serviceId,
         );
         if (!service) throw new Error('Serviço não encontrado.');
 
-        const received = await db.getFirstAsync<{ received_cents: number }>(
+        const received = await transaction.getFirstAsync<{ received_cents: number }>(
           `SELECT COALESCE(SUM(amount_cents), 0) AS received_cents
            FROM payments WHERE service_id = ? AND status = 'active'`,
           input.serviceId,
@@ -258,7 +258,7 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
         ]);
         validatePaymentAmount(input.amountCents, balanceCents);
 
-        await db.runAsync(
+        await transaction.runAsync(
           `INSERT INTO payments (id, service_id, amount_cents, payment_date, method, client_operation_id, status, created_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           input.id,
@@ -289,17 +289,17 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       return rows.map(mapPayment);
     },
     async reverse(id: string, reversedAt: string): Promise<PaymentRecord> {
-      return transactions.withExclusive({}, async () => {
-        const existing = await db.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
+      return transactions.withExclusive({}, async (transaction) => {
+        const existing = await transaction.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
         if (!existing) throw new Error('Recebimento não encontrado.');
         if (existing.status === 'reversed') return mapPayment(existing);
 
-        await db.runAsync(
+        await transaction.runAsync(
           "UPDATE payments SET status = 'reversed', reversed_at = ? WHERE id = ? AND status = 'active'",
           reversedAt,
           id,
         );
-        const updated = await db.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
+        const updated = await transaction.getFirstAsync<PaymentRow>('SELECT * FROM payments WHERE id = ?', id);
         if (!updated) throw new Error('Recebimento não encontrado.');
         return mapPayment(updated);
       });
@@ -308,14 +308,14 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
 
   const expenses: ExpenseRepository = {
     async create(input: CreateExpenseInput): Promise<ExpenseRecord> {
-      return transactions.withExclusive({ clientOperationId: input.clientOperationId }, async () => {
-        const existing = await db.getFirstAsync<ExpenseRow>(
+      return transactions.withExclusive({ clientOperationId: input.clientOperationId }, async (transaction) => {
+        const existing = await transaction.getFirstAsync<ExpenseRow>(
           'SELECT * FROM expenses WHERE client_operation_id = ?',
           input.clientOperationId,
         );
         if (existing) return mapExpense(existing);
 
-        await db.runAsync(
+        await transaction.runAsync(
           `INSERT INTO expenses (id, description, amount_cents, expense_date, category, client_operation_id, status, created_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           input.id,
@@ -342,17 +342,17 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       return rows.map(mapExpense);
     },
     async reverse(id: string, reversedAt: string): Promise<ExpenseRecord> {
-      return transactions.withExclusive({}, async () => {
-        const existing = await db.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
+      return transactions.withExclusive({}, async (transaction) => {
+        const existing = await transaction.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
         if (!existing) throw new Error('Despesa não encontrada.');
         if (existing.status === 'reversed') return mapExpense(existing);
 
-        await db.runAsync(
+        await transaction.runAsync(
           "UPDATE expenses SET status = 'reversed', reversed_at = ? WHERE id = ? AND status = 'active'",
           reversedAt,
           id,
         );
-        const updated = await db.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
+        const updated = await transaction.getFirstAsync<ExpenseRow>('SELECT * FROM expenses WHERE id = ?', id);
         if (!updated) throw new Error('Despesa não encontrada.');
         return mapExpense(updated);
       });

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { createPaymentUseCases } from '@/application/paymentUseCases';
@@ -198,7 +199,12 @@ export default function ServicesScreen() {
   if (clients.length === 0) {
     return (
       <View style={styles.screen}>
-        <AreaPlaceholder title="Serviços" description="Cadastre um cliente antes de criar um orçamento." />
+        <AreaPlaceholder
+          title="Serviços"
+          description="Cadastre um cliente antes de criar um orçamento."
+          actionLabel="Ir para Clientes"
+          onAction={() => router.push('/(tabs)/clientes')}
+        />
         {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       </View>
     );

@@ -16,6 +16,13 @@ type ExpenseFormProps = {
   }) => Promise<void> | void;
 };
 
+const expenseCategories = [
+  { value: 'material', label: 'Material' },
+  { value: 'transporte', label: 'Transporte' },
+  { value: 'ferramentas', label: 'Ferramentas' },
+  { value: 'outros', label: 'Outros' },
+];
+
 export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -100,6 +107,25 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
 
         <View style={styles.field}>
           <Text style={styles.label}>Categoria da saída</Text>
+          <View style={styles.categoryOptions}>
+            {expenseCategories.map((expenseCategory) => (
+              <Pressable
+                key={expenseCategory.value}
+                accessibilityRole="button"
+                accessibilityState={{ selected: category === expenseCategory.value }}
+                onPress={() => setCategory(expenseCategory.value)}
+                style={({ pressed }) => [
+                  styles.categoryOption,
+                  category === expenseCategory.value && styles.categoryOptionSelected,
+                  pressed && styles.categoryOptionPressed,
+                ]}
+              >
+                <Text style={[styles.categoryOptionText, category === expenseCategory.value && styles.categoryOptionTextSelected]}>
+                  {expenseCategory.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <TextInput
             accessibilityLabel="Categoria da saída"
             onChangeText={setCategory}
@@ -135,6 +161,12 @@ const styles = StyleSheet.create({
   label: { ...typeScale.bodyStrong, color: colors.content.primary },
   input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
   inputFocused: { borderColor: colors.interactive.accent, borderWidth: borders.width + 1 },
+  categoryOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
+  categoryOption: { minHeight: dimensions.touchTarget, justifyContent: 'center', borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, paddingHorizontal: spacing[3] },
+  categoryOptionSelected: { borderColor: colors.interactive.accent, backgroundColor: colors.background.pressed },
+  categoryOptionPressed: { opacity: 0.82 },
+  categoryOptionText: { ...typeScale.body, color: colors.content.secondary },
+  categoryOptionTextSelected: { ...typeScale.bodyStrong, color: colors.interactive.accent },
   error: { ...typeScale.body, color: colors.status.negative },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
