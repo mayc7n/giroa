@@ -8,6 +8,7 @@ import { createRuntimeId, currentInstant } from '@/application/runtime';
 import { createSqliteRepositories } from '@/data/database';
 import ClientForm from '@/features/clients/ClientForm';
 import ClientList from '@/features/clients/ClientList';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 export default function ClientsScreen() {
   const db = useSQLiteContext();
@@ -76,10 +77,10 @@ export default function ClientsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F7F5F0' },
-  backButton: { minHeight: 46, justifyContent: 'center', paddingHorizontal: 24 },
-  backText: { color: '#0B776D', fontSize: 15, fontWeight: '800' },
-  error: { color: '#A3312D', paddingHorizontal: 24, paddingBottom: 12 },
-  secondaryButton: { alignSelf: 'flex-start', marginHorizontal: 24, marginBottom: 18, minHeight: 46, justifyContent: 'center', borderRadius: 11, borderWidth: 1, borderColor: '#0B776D', paddingHorizontal: 16 },
-  secondaryText: { color: '#0B776D', fontSize: 15, fontWeight: '800' },
+  screen: { flex: 1, backgroundColor: colors.background.canvas },
+  backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center', paddingHorizontal: spacing[5] },
+  backText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  error: { ...typeScale.body, color: colors.status.negative, paddingHorizontal: spacing[5], paddingBottom: spacing[3] },
+  secondaryButton: { alignSelf: 'flex-start', marginHorizontal: spacing[5], marginBottom: spacing[4], minHeight: dimensions.touchTarget, justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  secondaryText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
 });

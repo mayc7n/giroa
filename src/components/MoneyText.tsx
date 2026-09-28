@@ -1,6 +1,7 @@
 import { StyleSheet, Text, type TextStyle } from 'react-native';
 
 import { formatCentsToBRL } from '@/domain/money';
+import { colors, typeScale } from '@/ui/tokens';
 
 type MoneyTextProps = {
   label: string;
@@ -13,5 +14,5 @@ export default function MoneyText({ label, cents, style }: MoneyTextProps) {
 }
 
 const styles = StyleSheet.create({
-  text: { color: '#173C35', fontSize: 20, fontWeight: '800' },
+  text: { ...typeScale.money, color: colors.content.primary },
 });

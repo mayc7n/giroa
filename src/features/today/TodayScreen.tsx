@@ -2,6 +2,8 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ReactNode } from 'react';
 
+import { colors, radii, spacing, typeScale } from '@/ui/tokens';
+
 type TodayScreenProps = {
   footer?: ReactNode;
 };
@@ -31,45 +33,40 @@ export default function TodayScreen({ footer }: TodayScreenProps = {}) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F5F0',
+    backgroundColor: colors.background.canvas,
   },
   content: {
     flexGrow: 1,
-    padding: 24,
-    gap: 12,
+    padding: spacing[5],
+    gap: spacing[3],
   },
   eyebrow: {
-    color: '#0B776D',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    ...typeScale.caption,
+    color: colors.interactive.accent,
+    letterSpacing: spacing[1] / 10,
   },
   title: {
-    color: '#17211F',
-    fontSize: 34,
-    fontWeight: '800',
+    ...typeScale.display,
+    color: colors.content.primary,
   },
   introduction: {
-    color: '#4A5753',
-    fontSize: 17,
-    lineHeight: 24,
+    ...typeScale.section,
+    color: colors.content.secondary,
     maxWidth: 440,
   },
   emptyState: {
-    marginTop: 24,
-    padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#E7F2EF',
-    gap: 8,
+    marginTop: spacing[5],
+    padding: spacing[5],
+    borderRadius: radii.lg,
+    backgroundColor: colors.background.surface,
+    gap: spacing[2],
   },
   emptyTitle: {
-    color: '#173C35',
-    fontSize: 18,
-    fontWeight: '700',
+    ...typeScale.section,
+    color: colors.content.primary,
   },
   emptyDescription: {
-    color: '#34564F',
-    fontSize: 16,
-    lineHeight: 23,
+    ...typeScale.body,
+    color: colors.content.secondary,
   },
 });

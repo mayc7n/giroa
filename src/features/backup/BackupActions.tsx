@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 
 import { createBackupUseCases } from '@/application/backupUseCases';
 import { parseBackup } from '@/data/backup';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 export default function BackupActions() {
   const db = useSQLiteContext();
@@ -110,15 +111,15 @@ function confirmRestore(): Promise<boolean> {
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 12, padding: 20, borderRadius: 16, backgroundColor: '#E7F2EF' },
-  title: { color: '#173C35', fontSize: 18, fontWeight: '800' },
-  description: { color: '#34564F', fontSize: 15, lineHeight: 21 },
-  actions: { gap: 10 },
-  button: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: '#0B776D', paddingHorizontal: 16 },
-  secondaryButton: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 11, borderWidth: 1, borderColor: '#0B776D', paddingHorizontal: 16 },
+  container: { gap: spacing[3], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
+  title: { ...typeScale.section, color: colors.content.primary },
+  description: { ...typeScale.body, color: colors.content.secondary },
+  actions: { gap: spacing[2] },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  secondaryButton: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   disabled: { opacity: 0.5 },
-  buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
-  secondaryText: { color: '#0B776D', fontSize: 15, fontWeight: '800' },
-  message: { color: '#173C35', fontSize: 15, lineHeight: 21 },
-  error: { color: '#A3312D', fontSize: 15, lineHeight: 21 },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  secondaryText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  message: { ...typeScale.body, color: colors.content.primary },
+  error: { ...typeScale.body, color: colors.status.negative },
 });

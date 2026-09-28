@@ -1,4 +1,4 @@
-import { colors, radii, shadows, spacing, typeScale } from '@/ui/tokens';
+import { colors, dimensions, radii, shadows, spacing, typeScale } from '@/ui/tokens';
 
 describe('Giroa UI tokens', () => {
   it('exposes the approved semantic dark palette', () => {
@@ -16,6 +16,7 @@ describe('Giroa UI tokens', () => {
     expect(typeScale.display).toMatchObject({ fontSize: 32, lineHeight: 38, fontWeight: '700' });
     expect(typeScale.body).toMatchObject({ fontSize: 15, lineHeight: 22, fontWeight: '400' });
     expect(typeScale.money).toMatchObject({ fontSize: 28, lineHeight: 32, fontWeight: '700' });
+    expect(dimensions).toMatchObject({ touchTarget: 44, action: 52, row: 56, input: 52 });
   });
 
   it('exposes the shared elevated-surface shadow', () => {

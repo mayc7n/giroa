@@ -64,6 +64,13 @@ export const radii = {
   pill: 999,
 } as const;
 
+export const dimensions = {
+  touchTarget: 44,
+  action: 52,
+  row: 56,
+  input: 52,
+} as const;
+
 export const typeScale = {
   display: { fontSize: 32, lineHeight: 38, fontWeight: '700' as const },
   title: { fontSize: 24, lineHeight: 30, fontWeight: '700' as const },

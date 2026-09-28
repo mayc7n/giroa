@@ -5,6 +5,7 @@ import type { ServiceFinancialSummary } from '@/application/paymentUseCases';
 import MoneyText from '@/components/MoneyText';
 import { formatISODateToBR } from '@/domain/date';
 import { formatCentsToBRL } from '@/domain/money';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type ServiceDetailProps = {
   service: ServiceRecord;
@@ -78,22 +79,22 @@ export default function ServiceDetail({ service, summary, payments, onRegisterPa
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 16, padding: 24, backgroundColor: '#F7F5F0' },
-  title: { color: '#17211F', fontSize: 26, fontWeight: '800' },
-  statusRow: { gap: 4 },
-  statusLabel: { color: '#4A5753', fontSize: 14, fontWeight: '700' },
-  status: { color: '#0B776D', fontSize: 16, fontWeight: '800' },
-  financialBox: { gap: 12, padding: 18, borderRadius: 14, backgroundColor: '#E7F2EF' },
-  received: { color: '#34564F', fontSize: 18 },
-  balance: { color: '#173C35', fontSize: 22 },
-  button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
-  settled: { color: '#0B776D', fontSize: 16, fontWeight: '800' },
-  history: { gap: 10, marginTop: 8 },
-  historyTitle: { color: '#17211F', fontSize: 18, fontWeight: '800' },
-  historyEmpty: { color: '#4A5753', fontSize: 15 },
-  paymentRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#C7D0CC' },
-  paymentDescription: { flex: 1, color: '#4A5753', fontSize: 15 },
-  paymentAmount: { color: '#173C35', fontSize: 15, fontWeight: '800' },
-  receiptLink: { color: '#0B776D', fontSize: 14, fontWeight: '800' },
+  content: { gap: spacing[4], padding: spacing[5], backgroundColor: colors.background.canvas },
+  title: { ...typeScale.title, color: colors.content.primary },
+  statusRow: { gap: spacing[1] },
+  statusLabel: { ...typeScale.caption, color: colors.content.secondary },
+  status: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  financialBox: { gap: spacing[3], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
+  received: { ...typeScale.section, color: colors.content.secondary },
+  balance: { ...typeScale.money, color: colors.content.primary },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  settled: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  history: { gap: spacing[2], marginTop: spacing[2] },
+  historyTitle: { ...typeScale.section, color: colors.content.primary },
+  historyEmpty: { ...typeScale.body, color: colors.content.secondary },
+  paymentRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3], paddingVertical: spacing[3], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
+  paymentDescription: { flex: 1, ...typeScale.body, color: colors.content.secondary },
+  paymentAmount: { ...typeScale.bodyStrong, color: colors.content.primary },
+  receiptLink: { ...typeScale.caption, color: colors.interactive.accent },
 });

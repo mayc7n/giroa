@@ -8,6 +8,7 @@ import { createRuntimeId, currentCivilMonthPeriod, currentInstant } from '@/appl
 import { createSqliteRepositories } from '@/data/database';
 import { formatCentsToBRL } from '@/domain/money';
 import ExpenseForm from '@/features/expenses/ExpenseForm';
+import { colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 export default function CashScreen() {
   const db = useSQLiteContext();
@@ -88,18 +89,18 @@ export default function CashScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, gap: 16, padding: 24, backgroundColor: '#F7F5F0' },
-  title: { color: '#17211F', fontSize: 30, fontWeight: '800' },
-  description: { color: '#4A5753', fontSize: 16, lineHeight: 23 },
-  back: { color: '#0B776D', fontSize: 16, fontWeight: '800' },
-  action: { minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
-  actionText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
-  box: { gap: 10, padding: 18, borderRadius: 14, backgroundColor: '#E7F2EF' },
-  boxTitle: { color: '#34564F', fontSize: 15, fontWeight: '700' },
-  total: { color: '#173C35', fontSize: 24, fontWeight: '800' },
-  line: { color: '#34564F', fontSize: 16 },
-  pendingBox: { gap: 6, padding: 18, borderRadius: 14, backgroundColor: '#FFF4D6' },
-  pendingTitle: { color: '#5B4613', fontSize: 15, fontWeight: '700' },
-  pending: { color: '#5B4613', fontSize: 22, fontWeight: '800' },
-  error: { color: '#A3312D', fontSize: 15 },
+  screen: { flex: 1, gap: spacing[4], padding: spacing[5], backgroundColor: colors.background.canvas },
+  title: { ...typeScale.title, color: colors.content.primary },
+  description: { ...typeScale.body, color: colors.content.secondary },
+  back: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  action: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  actionText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  box: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
+  boxTitle: { ...typeScale.bodyStrong, color: colors.content.secondary },
+  total: { ...typeScale.money, color: colors.content.primary },
+  line: { ...typeScale.body, color: colors.content.secondary },
+  pendingBox: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
+  pendingTitle: { ...typeScale.bodyStrong, color: colors.status.pending },
+  pending: { ...typeScale.money, color: colors.status.pending },
+  error: { ...typeScale.body, color: colors.status.negative },
 });

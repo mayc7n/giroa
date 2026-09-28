@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { createRuntimeId, currentCivilDate } from '@/application/runtime';
 import { formatISODateToBR, parseBRDateToISO } from '@/domain/date';
 import { formatCentsToBRL, parseMoneyToCents } from '@/domain/money';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type PaymentFormProps = {
   balanceCents: number;
@@ -115,19 +116,19 @@ export default function PaymentForm({ balanceCents, onSubmit }: PaymentFormProps
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#F7F5F0' },
-  content: { padding: 24, gap: 16 },
-  title: { color: '#17211F', fontSize: 30, fontWeight: '800' },
-  balance: { color: '#173C35', fontSize: 20, fontWeight: '800' },
-  field: { gap: 8 },
-  label: { color: '#273632', fontSize: 15, fontWeight: '700' },
-  input: { minHeight: 52, borderWidth: 1, borderColor: '#B7C4BF', borderRadius: 12, backgroundColor: '#FFFFFF', color: '#17211F', fontSize: 17, paddingHorizontal: 14 },
-  methodOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  methodOption: { minHeight: 46, justifyContent: 'center', borderWidth: 1, borderColor: '#B7C4BF', borderRadius: 11, backgroundColor: '#FFFFFF', paddingHorizontal: 15 },
-  methodOptionSelected: { borderColor: '#0B776D', backgroundColor: '#E7F2EF' },
-  methodText: { color: '#17211F', fontSize: 15, fontWeight: '700' },
-  error: { color: '#A3312D', fontSize: 15, lineHeight: 21 },
-  button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
+  flex: { flex: 1, backgroundColor: colors.background.canvas },
+  content: { padding: spacing[5], gap: spacing[4] },
+  title: { ...typeScale.title, color: colors.content.primary },
+  balance: { ...typeScale.section, color: colors.content.primary },
+  field: { gap: spacing[2] },
+  label: { ...typeScale.bodyStrong, color: colors.content.primary },
+  input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
+  methodOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
+  methodOption: { minHeight: dimensions.touchTarget, justifyContent: 'center', borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, paddingHorizontal: spacing[4] },
+  methodOptionSelected: { borderColor: colors.interactive.accent, backgroundColor: colors.background.pressed },
+  methodText: { ...typeScale.bodyStrong, color: colors.content.primary },
+  error: { ...typeScale.body, color: colors.status.negative },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   buttonDisabled: { opacity: 0.5 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
 });

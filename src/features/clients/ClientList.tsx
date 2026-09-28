@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { ClientSelection, ClientSummary } from '@/domain/types';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type ClientListProps = {
   clients: ClientSummary[];
@@ -57,20 +58,20 @@ export default function ClientList({ clients, onRegister, selection, onSelectCli
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, padding: 24, gap: 16, backgroundColor: '#F7F5F0' },
-  header: { gap: 16 },
-  heading: { gap: 6 },
-  title: { color: '#17211F', fontSize: 30, fontWeight: '800' },
-  description: { color: '#4A5753', fontSize: 16, lineHeight: 23 },
-  smallButton: { alignSelf: 'flex-start', minHeight: 46, justifyContent: 'center', borderRadius: 11, backgroundColor: '#0B776D', paddingHorizontal: 16 },
-  smallButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
-  emptyState: { gap: 7, padding: 18, borderRadius: 14, backgroundColor: '#E7F2EF' },
-  emptyTitle: { color: '#173C35', fontSize: 17, fontWeight: '800' },
-  emptyDescription: { color: '#34564F', fontSize: 15, lineHeight: 21 },
-  row: { gap: 4, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#C7D0CC' },
-  rowTitle: { color: '#17211F', fontSize: 17, fontWeight: '700' },
-  rowDescription: { color: '#4A5753', fontSize: 15 },
-  selection: { gap: 10, marginTop: 8, padding: 16, borderRadius: 14, backgroundColor: '#FFF4D6' },
-  selectionTitle: { color: '#5B4613', fontSize: 16, fontWeight: '800' },
-  candidate: { gap: 4, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#D8C99E' },
+  content: { flexGrow: 1, padding: spacing[5], gap: spacing[4], backgroundColor: colors.background.canvas },
+  header: { gap: spacing[4] },
+  heading: { gap: spacing[2] },
+  title: { ...typeScale.title, color: colors.content.primary },
+  description: { ...typeScale.body, color: colors.content.secondary },
+  smallButton: { alignSelf: 'flex-start', minHeight: dimensions.action, justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  smallButtonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  emptyState: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
+  emptyTitle: { ...typeScale.section, color: colors.content.primary },
+  emptyDescription: { ...typeScale.body, color: colors.content.secondary },
+  row: { gap: spacing[1], minHeight: dimensions.row, paddingVertical: spacing[4], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
+  rowTitle: { ...typeScale.section, color: colors.content.primary },
+  rowDescription: { ...typeScale.body, color: colors.content.secondary },
+  selection: { gap: spacing[3], marginTop: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
+  selectionTitle: { ...typeScale.bodyStrong, color: colors.status.pending },
+  candidate: { gap: spacing[1], minHeight: dimensions.row, paddingVertical: spacing[3], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
 });

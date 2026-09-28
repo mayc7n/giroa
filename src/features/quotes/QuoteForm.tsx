@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { formatCentsToBRL, parseMoneyToCents } from '@/domain/money';
 import { calculateQuoteTotal } from '@/domain/quote';
 import type { ClientSummary, QuoteItemInput } from '@/domain/types';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type QuoteFormProps = {
   clients: ClientSummary[];
@@ -92,19 +93,19 @@ export default function QuoteForm({ clients, onSubmit }: QuoteFormProps) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#F7F5F0' },
-  content: { padding: 24, gap: 15 },
-  title: { color: '#17211F', fontSize: 30, fontWeight: '800' },
-  field: { gap: 8 },
-  label: { color: '#273632', fontSize: 15, fontWeight: '700' },
-  clientOptions: { gap: 8 },
-  clientOption: { gap: 3, padding: 12, borderWidth: 1, borderColor: '#B7C4BF', borderRadius: 12, backgroundColor: '#FFFFFF' },
-  clientOptionSelected: { borderColor: '#0B776D', backgroundColor: '#E7F2EF' },
-  clientName: { color: '#17211F', fontSize: 16, fontWeight: '700' },
-  clientContact: { color: '#4A5753', fontSize: 14 },
-  input: { minHeight: 52, borderWidth: 1, borderColor: '#B7C4BF', borderRadius: 12, backgroundColor: '#FFFFFF', color: '#17211F', fontSize: 17, paddingHorizontal: 14 },
-  total: { color: '#173C35', fontSize: 22, fontWeight: '800', marginTop: 4 },
-  error: { color: '#A3312D', fontSize: 15 },
-  button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  flex: { flex: 1, backgroundColor: colors.background.canvas },
+  content: { padding: spacing[5], gap: spacing[4] },
+  title: { ...typeScale.title, color: colors.content.primary },
+  field: { gap: spacing[2] },
+  label: { ...typeScale.bodyStrong, color: colors.content.primary },
+  clientOptions: { gap: spacing[2] },
+  clientOption: { gap: spacing[1], padding: spacing[3], borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface },
+  clientOptionSelected: { borderColor: colors.interactive.accent, backgroundColor: colors.background.pressed },
+  clientName: { ...typeScale.bodyStrong, color: colors.content.primary },
+  clientContact: { ...typeScale.caption, color: colors.content.secondary },
+  input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
+  total: { ...typeScale.money, color: colors.content.primary, marginTop: spacing[1] },
+  error: { ...typeScale.body, color: colors.status.negative },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
 });

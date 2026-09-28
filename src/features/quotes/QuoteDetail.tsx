@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { formatCentsToBRL } from '@/domain/money';
 import type { QuoteRecord } from '@/data/sqliteTypes';
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type QuoteDetailProps = {
   quote: QuoteRecord;
@@ -47,14 +48,14 @@ export default function QuoteDetail({ quote, onApprove, onCreateService, onShare
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 16, padding: 24, backgroundColor: '#F7F5F0' },
-  title: { color: '#17211F', fontSize: 26, fontWeight: '800' },
-  status: { color: '#0B776D', fontSize: 15, fontWeight: '700' },
-  totalBox: { gap: 5, padding: 18, borderRadius: 14, backgroundColor: '#E7F2EF' },
-  totalLabel: { color: '#34564F', fontSize: 14, fontWeight: '700' },
-  total: { color: '#173C35', fontSize: 22, fontWeight: '800' },
-  button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
-  secondaryButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderColor: '#0B776D', paddingHorizontal: 18 },
-  secondaryButtonText: { color: '#0B776D', fontSize: 16, fontWeight: '800' },
+  content: { gap: spacing[4], padding: spacing[5], backgroundColor: colors.background.canvas },
+  title: { ...typeScale.title, color: colors.content.primary },
+  status: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  totalBox: { gap: spacing[1], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
+  totalLabel: { ...typeScale.caption, color: colors.content.secondary },
+  total: { ...typeScale.money, color: colors.content.primary },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  secondaryButton: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  secondaryButtonText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
 });

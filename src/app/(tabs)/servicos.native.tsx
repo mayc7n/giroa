@@ -17,6 +17,7 @@ import ServiceDetail from '@/features/services/ServiceDetail';
 import ServiceList from '@/features/services/ServiceList';
 import type { ServiceFinancialSummary } from '@/application/paymentUseCases';
 import type { ServiceRecord } from '@/data/sqliteTypes';
+import { colors, dimensions, spacing, typeScale } from '@/ui/tokens';
 
 export default function ServicesScreen() {
   const db = useSQLiteContext();
@@ -229,8 +230,8 @@ export default function ServicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F7F5F0' },
-  backButton: { minHeight: 46, justifyContent: 'center', paddingHorizontal: 24 },
-  backText: { color: '#0B776D', fontSize: 15, fontWeight: '800' },
-  error: { color: '#A3312D', paddingHorizontal: 24, paddingBottom: 12 },
+  screen: { flex: 1, backgroundColor: colors.background.canvas },
+  backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center', paddingHorizontal: spacing[5] },
+  backText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  error: { ...typeScale.body, color: colors.status.negative, paddingHorizontal: spacing[5], paddingBottom: spacing[3] },
 });

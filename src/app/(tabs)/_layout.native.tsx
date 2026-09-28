@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { SQLiteProvider } from 'expo-sqlite';
 
 import { migrateDatabase } from '@/data/migrations';
+import { colors } from '@/ui/tokens';
 
 export default function TabsLayout() {
   return (
@@ -10,8 +11,12 @@ export default function TabsLayout() {
         initialRouteName="hoje"
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: '#0B776D',
-          tabBarInactiveTintColor: '#65716D',
+          tabBarActiveTintColor: colors.interactive.accent,
+          tabBarInactiveTintColor: colors.content.muted,
+          tabBarStyle: {
+            backgroundColor: colors.background.surface,
+            borderTopColor: colors.border.default,
+          },
         }}
       >
         <Tabs.Screen name="hoje" options={{ title: 'Hoje' }} />

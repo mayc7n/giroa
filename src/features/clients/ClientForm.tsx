@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
+
 type ClientFormProps = {
   onSubmit: (input: { name: string; contact: string | null }) => Promise<void> | void;
   submitting?: boolean;
@@ -75,16 +77,16 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#F7F5F0' },
-  content: { padding: 24, gap: 16 },
-  title: { color: '#17211F', fontSize: 30, fontWeight: '800' },
-  description: { color: '#4A5753', fontSize: 16, lineHeight: 23 },
-  field: { gap: 8 },
-  label: { color: '#273632', fontSize: 15, fontWeight: '700' },
-  input: { minHeight: 52, borderWidth: 1, borderColor: '#B7C4BF', borderRadius: 12, backgroundColor: '#FFFFFF', color: '#17211F', fontSize: 17, paddingHorizontal: 14 },
-  error: { color: '#A3312D', fontSize: 15, lineHeight: 21 },
-  button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#0B776D', paddingHorizontal: 18 },
-  buttonPressed: { opacity: 0.82 },
+  flex: { flex: 1, backgroundColor: colors.background.canvas },
+  content: { padding: spacing[5], gap: spacing[4] },
+  title: { ...typeScale.title, color: colors.content.primary },
+  description: { ...typeScale.body, color: colors.content.secondary },
+  field: { gap: spacing[2] },
+  label: { ...typeScale.bodyStrong, color: colors.content.primary },
+  input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
+  error: { ...typeScale.body, color: colors.status.negative },
+  button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   buttonDisabled: { opacity: 0.5 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
 });

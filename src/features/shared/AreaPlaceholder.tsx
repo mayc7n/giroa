@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { colors, spacing, typeScale } from '@/ui/tokens';
+
 type AreaPlaceholderProps = {
   title: string;
   description: string;
@@ -20,21 +22,19 @@ export default function AreaPlaceholder({ title, description }: AreaPlaceholderP
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F5F0',
+    backgroundColor: colors.background.canvas,
   },
   content: {
     flex: 1,
-    padding: 24,
-    gap: 12,
+    padding: spacing[5],
+    gap: spacing[3],
   },
   title: {
-    color: '#17211F',
-    fontSize: 30,
-    fontWeight: '800',
+    ...typeScale.title,
+    color: colors.content.primary,
   },
   description: {
-    color: '#4A5753',
-    fontSize: 17,
-    lineHeight: 24,
+    ...typeScale.section,
+    color: colors.content.secondary,
   },
 });

@@ -1,13 +1,19 @@
 import { Tabs } from 'expo-router';
 
+import { colors } from '@/ui/tokens';
+
 export default function TabsLayout() {
   return (
     <Tabs
       initialRouteName="hoje"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#0B776D',
-        tabBarInactiveTintColor: '#65716D',
+        tabBarActiveTintColor: colors.interactive.accent,
+        tabBarInactiveTintColor: colors.content.muted,
+        tabBarStyle: {
+          backgroundColor: colors.background.surface,
+          borderTopColor: colors.border.default,
+        },
       }}
     >
       <Tabs.Screen name="hoje" options={{ title: 'Hoje' }} />
