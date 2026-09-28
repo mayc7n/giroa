@@ -1,3 +1,5 @@
-import TodayScreen from '@/features/today/TodayScreen';
+import { Redirect } from 'expo-router';
 
-export default TodayScreen;
+export default function IndexRoute() {
+  return <Redirect href="/(tabs)/hoje" />;
+}

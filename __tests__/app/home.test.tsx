@@ -1,12 +1,20 @@
 import { render } from '@testing-library/react-native';
 
+jest.mock('expo-router', () => {
+  const React = require('react');
+  const { Text: MockText } = require('react-native');
+
+  return {
+    Redirect: ({ href }: { href: string }) => React.createElement(MockText, { testID: 'home-route-target' }, href),
+  };
+});
+
 import HomeScreen from '@/app/index';
 
-describe('Hoje', () => {
-  it('mostra o estado vazio inicial', () => {
+describe('rota inicial', () => {
+  it('redireciona a raiz para Hoje dentro da navegação por abas', () => {
     const { getByText } = render(<HomeScreen />);
 
-    expect(getByText('Hoje')).toBeTruthy();
-    expect(getByText('Nada pendente por enquanto.')).toBeTruthy();
+    expect(getByText('/(tabs)/hoje')).toBeTruthy();
   });
 });
