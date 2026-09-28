@@ -76,7 +76,7 @@ export default function ServicesScreen() {
     if (showPaymentForm) {
       return (
         <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => setShowPaymentForm(false)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => setShowPaymentForm(false)} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
             <Text style={styles.backText}>Voltar para o serviço</Text>
           </Pressable>
           <PaymentForm
@@ -93,7 +93,7 @@ export default function ServicesScreen() {
 
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => { setService(null); setSummary(null); }} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => { setService(null); setSummary(null); }} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
           <Text style={styles.backText}>Voltar para orçamentos</Text>
         </Pressable>
         <ServiceDetail
@@ -125,7 +125,7 @@ export default function ServicesScreen() {
   if (quote) {
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => { setQuote(null); setShowNewQuote(false); }} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => { setQuote(null); setShowNewQuote(false); }} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
           <Text style={styles.backText}>Novo orçamento</Text>
         </Pressable>
         <QuoteDetail
@@ -207,7 +207,7 @@ export default function ServicesScreen() {
   return (
     <View style={styles.screen}>
       {savedServices.length > 0 ? (
-        <Pressable accessibilityRole="button" onPress={() => setShowNewQuote(false)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => setShowNewQuote(false)} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
           <Text style={styles.backText}>Voltar para serviços salvos</Text>
         </Pressable>
       ) : null}
@@ -232,6 +232,7 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background.canvas },
   backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center', paddingHorizontal: spacing[5] },
+  backPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   backText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
   error: { ...typeScale.body, color: colors.status.negative, paddingHorizontal: spacing[5], paddingBottom: spacing[3] },
 });

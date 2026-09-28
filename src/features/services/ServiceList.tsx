@@ -25,7 +25,7 @@ export default function ServiceList({ services, onSelect, onCreateQuote }: Servi
           <Text style={styles.title}>Serviços</Text>
           <Text style={styles.description}>Serviços salvos e seus valores históricos.</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={onCreateQuote} style={styles.button}>
+        <Pressable accessibilityRole="button" onPress={onCreateQuote} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
           <Text style={styles.buttonText}>Novo orçamento</Text>
         </Pressable>
       </View>
@@ -40,7 +40,7 @@ export default function ServiceList({ services, onSelect, onCreateQuote }: Servi
           key={service.id}
           accessibilityRole="button"
           onPress={() => onSelect(service)}
-          style={styles.row}
+          style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
         >
           <Text style={styles.rowTitle}>{service.description}</Text>
           <Text style={styles.rowDescription}>{clientName}</Text>
@@ -59,11 +59,13 @@ const styles = StyleSheet.create({
   title: { ...typeScale.title, color: colors.content.primary },
   description: { ...typeScale.body, color: colors.content.secondary },
   button: { alignSelf: 'flex-start', minHeight: dimensions.action, justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   emptyState: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
   emptyTitle: { ...typeScale.section, color: colors.content.primary },
   emptyDescription: { ...typeScale.body, color: colors.content.secondary },
   row: { gap: spacing[1], minHeight: dimensions.row, paddingVertical: spacing[4], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
+  rowPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   rowTitle: { ...typeScale.section, color: colors.content.primary },
   rowDescription: { ...typeScale.body, color: colors.content.secondary },
   total: { ...typeScale.bodyStrong, color: colors.content.primary },

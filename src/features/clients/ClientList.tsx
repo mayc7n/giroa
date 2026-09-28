@@ -18,7 +18,7 @@ export default function ClientList({ clients, onRegister, selection, onSelectCli
           <Text style={styles.title}>Clientes</Text>
           <Text style={styles.description}>Pessoas atendidas e seus históricos.</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={onRegister} style={styles.smallButton}>
+        <Pressable accessibilityRole="button" onPress={onRegister} style={({ pressed }) => [styles.smallButton, pressed && styles.smallButtonPressed]}>
           <Text style={styles.smallButtonText}>Registrar cliente</Text>
         </Pressable>
       </View>
@@ -45,7 +45,7 @@ export default function ClientList({ clients, onRegister, selection, onSelectCli
               key={client.id}
               accessibilityRole="button"
               onPress={() => onSelectClient(client)}
-              style={styles.candidate}
+              style={({ pressed }) => [styles.candidate, pressed && styles.candidatePressed]}
             >
               <Text style={styles.rowTitle}>{client.name}</Text>
               <Text style={styles.rowDescription}>{client.contact || 'Sem contato informado'}</Text>
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
   title: { ...typeScale.title, color: colors.content.primary },
   description: { ...typeScale.body, color: colors.content.secondary },
   smallButton: { alignSelf: 'flex-start', minHeight: dimensions.action, justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  smallButtonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   smallButtonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   emptyState: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
   emptyTitle: { ...typeScale.section, color: colors.content.primary },
@@ -74,4 +75,5 @@ const styles = StyleSheet.create({
   selection: { gap: spacing[3], marginTop: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
   selectionTitle: { ...typeScale.bodyStrong, color: colors.status.pending },
   candidate: { gap: spacing[1], minHeight: dimensions.row, paddingVertical: spacing[3], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
+  candidatePressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
 });

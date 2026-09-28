@@ -29,17 +29,17 @@ export default function QuoteDetail({ quote, onApprove, onCreateService, onShare
         <Text style={styles.total}>Total {formatCentsToBRL(quote.totalCents)}</Text>
       </View>
       {quote.status === 'draft' || quote.status === 'sent' ? (
-        <Pressable accessibilityRole="button" onPress={onApprove} style={styles.button}>
+        <Pressable accessibilityRole="button" onPress={onApprove} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
           <Text style={styles.buttonText}>Aprovar orçamento</Text>
         </Pressable>
       ) : null}
       {quote.status === 'approved' && onCreateService ? (
-        <Pressable accessibilityRole="button" onPress={onCreateService} style={styles.secondaryButton}>
+        <Pressable accessibilityRole="button" onPress={onCreateService} style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}>
           <Text style={styles.secondaryButtonText}>Criar serviço</Text>
         </Pressable>
       ) : null}
       {onShareQuote ? (
-        <Pressable accessibilityRole="button" onPress={onShareQuote} style={styles.secondaryButton}>
+        <Pressable accessibilityRole="button" onPress={onShareQuote} style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}>
           <Text style={styles.secondaryButtonText}>Compartilhar orçamento</Text>
         </Pressable>
       ) : null}
@@ -55,7 +55,9 @@ const styles = StyleSheet.create({
   totalLabel: { ...typeScale.caption, color: colors.content.secondary },
   total: { ...typeScale.money, color: colors.content.primary },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   secondaryButton: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   secondaryButtonText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  secondaryPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
 });

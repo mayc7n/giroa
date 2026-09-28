@@ -23,6 +23,7 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [category, setCategory] = useState('outros');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
   const operationIdRef = useRef<string | null>(null);
 
   async function handleSubmit() {
@@ -58,8 +59,11 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
           <TextInput
             accessibilityLabel="Descrição da saída"
             onChangeText={setDescription}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="Ex.: compra de material"
-            style={styles.input}
+            placeholderTextColor={colors.content.muted}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={description}
           />
         </View>
@@ -70,8 +74,11 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
             accessibilityLabel="Valor da saída"
             keyboardType="decimal-pad"
             onChangeText={setAmount}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="R$ 0,00"
-            style={styles.input}
+            placeholderTextColor={colors.content.muted}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={amount}
           />
         </View>
@@ -82,8 +89,11 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
             accessibilityLabel="Data da saída"
             keyboardType="numbers-and-punctuation"
             onChangeText={setExpenseDate}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="DD/MM/AAAA"
-            style={styles.input}
+            placeholderTextColor={colors.content.muted}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={expenseDate}
           />
         </View>
@@ -93,8 +103,11 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
           <TextInput
             accessibilityLabel="Categoria da saída"
             onChangeText={setCategory}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="Ex.: material"
-            style={styles.input}
+            placeholderTextColor={colors.content.muted}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={category}
           />
         </View>
@@ -105,9 +118,9 @@ export default function ExpenseForm({ onSubmit }: ExpenseFormProps) {
           accessibilityState={{ disabled: submitting }}
           disabled={submitting}
           onPress={handleSubmit}
-          style={[styles.button, submitting && styles.buttonDisabled]}
+          style={({ pressed }) => [styles.button, pressed && !submitting && styles.buttonPressed, submitting && styles.buttonDisabled]}
         >
-          <Text style={styles.buttonText}>{submitting ? 'Registrando…' : 'Registrar saída'}</Text>
+          <Text style={[styles.buttonText, submitting && styles.buttonDisabledText]}>{submitting ? 'Registrando…' : 'Registrar saída'}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -121,8 +134,11 @@ const styles = StyleSheet.create({
   field: { gap: spacing[2] },
   label: { ...typeScale.bodyStrong, color: colors.content.primary },
   input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
+  inputFocused: { borderColor: colors.interactive.accent, borderWidth: borders.width + 1 },
   error: { ...typeScale.body, color: colors.status.negative },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
-  buttonDisabled: { opacity: 0.5 },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
+  buttonDisabled: { backgroundColor: colors.background.surface },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  buttonDisabledText: { color: colors.content.muted },
 });

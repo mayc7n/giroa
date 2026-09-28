@@ -12,6 +12,7 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
   async function handleSubmit() {
     setError(null);
@@ -40,9 +41,12 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
             autoCapitalize="words"
             autoCorrect={false}
             onChangeText={setName}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="Ex.: Ana Souza"
+            placeholderTextColor={colors.content.muted}
             returnKeyType="next"
-            style={styles.input}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={name}
           />
         </View>
@@ -53,9 +57,12 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
             accessibilityLabel="Contato do cliente"
             keyboardType="phone-pad"
             onChangeText={setContact}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             placeholder="WhatsApp ou telefone"
+            placeholderTextColor={colors.content.muted}
             returnKeyType="done"
-            style={styles.input}
+            style={[styles.input, inputFocused && styles.inputFocused]}
             value={contact}
           />
         </View>
@@ -67,9 +74,9 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
           accessibilityState={{ disabled: submitting }}
           disabled={submitting}
           onPress={handleSubmit}
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed, submitting && styles.buttonDisabled]}
+          style={({ pressed }) => [styles.button, pressed && !submitting && styles.buttonPressed, submitting && styles.buttonDisabled]}
         >
-          <Text style={styles.buttonText}>{submitting ? 'Salvando…' : 'Salvar cliente'}</Text>
+          <Text style={[styles.buttonText, submitting && styles.buttonDisabledText]}>{submitting ? 'Salvando…' : 'Salvar cliente'}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -84,9 +91,11 @@ const styles = StyleSheet.create({
   field: { gap: spacing[2] },
   label: { ...typeScale.bodyStrong, color: colors.content.primary },
   input: { ...typeScale.body, minHeight: dimensions.input, borderWidth: borders.width, borderColor: colors.border.default, borderRadius: radii.md, backgroundColor: colors.background.surface, color: colors.content.primary, paddingHorizontal: spacing[4] },
+  inputFocused: { borderColor: colors.interactive.accent, borderWidth: borders.width + 1 },
   error: { ...typeScale.body, color: colors.status.negative },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
-  buttonDisabled: { opacity: 0.5 },
+  buttonDisabled: { backgroundColor: colors.background.surface },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
+  buttonDisabledText: { color: colors.content.muted },
 });

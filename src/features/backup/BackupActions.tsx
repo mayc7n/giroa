@@ -77,18 +77,18 @@ export default function BackupActions() {
           accessibilityState={{ disabled: busy !== null }}
           disabled={busy !== null}
           onPress={exportData}
-          style={[styles.button, busy !== null && styles.disabled]}
+          style={({ pressed }) => [styles.button, pressed && busy === null && styles.buttonPressed, busy !== null && styles.disabled]}
         >
-          <Text style={styles.buttonText}>{busy === 'exporting' ? 'Preparando…' : 'Exportar dados'}</Text>
+          <Text style={[styles.buttonText, busy !== null && styles.disabledText]}>{busy === 'exporting' ? 'Preparando…' : 'Exportar dados'}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ disabled: busy !== null }}
           disabled={busy !== null}
           onPress={restoreData}
-          style={[styles.secondaryButton, busy !== null && styles.disabled]}
+          style={({ pressed }) => [styles.secondaryButton, pressed && busy === null && styles.secondaryPressed, busy !== null && styles.secondaryDisabled]}
         >
-          <Text style={styles.secondaryText}>{busy === 'restoring' ? 'Lendo arquivo…' : 'Restaurar dados'}</Text>
+          <Text style={[styles.secondaryText, busy !== null && styles.disabledText]}>{busy === 'restoring' ? 'Lendo arquivo…' : 'Restaurar dados'}</Text>
         </Pressable>
       </View>
       {message ? <Text accessibilityLiveRegion="polite" style={styles.message}>{message}</Text> : null}
@@ -117,9 +117,13 @@ const styles = StyleSheet.create({
   actions: { gap: spacing[2] },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
   secondaryButton: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
-  disabled: { opacity: 0.5 },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
+  secondaryPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
+  disabled: { backgroundColor: colors.background.surface },
+  secondaryDisabled: { backgroundColor: colors.background.surface, borderColor: colors.border.default },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   secondaryText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
+  disabledText: { color: colors.content.muted },
   message: { ...typeScale.body, color: colors.content.primary },
   error: { ...typeScale.body, color: colors.status.negative },
 });

@@ -50,7 +50,7 @@ export default function ServiceDetail({ service, summary, payments, onRegisterPa
         <MoneyText label="Saldo a receber" cents={summary.balanceCents} style={styles.balance} />
       </View>
       {summary.balanceCents > 0 ? (
-        <Pressable accessibilityRole="button" onPress={onRegisterPayment} style={styles.button}>
+        <Pressable accessibilityRole="button" onPress={onRegisterPayment} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
           <Text style={styles.buttonText}>Registrar recebimento</Text>
         </Pressable>
       ) : (
@@ -67,7 +67,7 @@ export default function ServiceDetail({ service, summary, payments, onRegisterPa
             </Text>
             <Text style={styles.paymentAmount}>{formatCentsToBRL(payment.amountCents)}</Text>
             {payment.status === 'active' && onShareReceipt ? (
-              <Pressable accessibilityRole="button" onPress={() => onShareReceipt(payment)}>
+              <Pressable accessibilityRole="button" onPress={() => onShareReceipt(payment)} style={({ pressed }) => [styles.receiptButton, pressed && styles.receiptPressed]}>
                 <Text style={styles.receiptLink}>Compartilhar recibo</Text>
               </Pressable>
             ) : null}
@@ -88,13 +88,16 @@ const styles = StyleSheet.create({
   received: { ...typeScale.section, color: colors.content.secondary },
   balance: { ...typeScale.money, color: colors.content.primary },
   button: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  buttonPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   buttonText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   settled: { ...typeScale.bodyStrong, color: colors.interactive.accent },
   history: { gap: spacing[2], marginTop: spacing[2] },
   historyTitle: { ...typeScale.section, color: colors.content.primary },
   historyEmpty: { ...typeScale.body, color: colors.content.secondary },
-  paymentRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3], paddingVertical: spacing[3], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
+  paymentRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3], minHeight: dimensions.row, paddingVertical: spacing[3], borderBottomWidth: borders.width, borderBottomColor: colors.border.default },
   paymentDescription: { flex: 1, ...typeScale.body, color: colors.content.secondary },
   paymentAmount: { ...typeScale.bodyStrong, color: colors.content.primary },
+  receiptButton: { minHeight: dimensions.touchTarget, justifyContent: 'center' },
+  receiptPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   receiptLink: { ...typeScale.caption, color: colors.interactive.accent },
 });

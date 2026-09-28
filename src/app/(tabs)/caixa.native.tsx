@@ -52,7 +52,7 @@ export default function CashScreen() {
   if (showExpenseForm) {
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(false)}>
+        <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(false)} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
           <Text style={styles.back}>Voltar para Caixa</Text>
         </Pressable>
         <ExpenseForm
@@ -70,7 +70,7 @@ export default function CashScreen() {
     <View style={styles.screen}>
       <Text style={styles.title}>Caixa</Text>
       <Text style={styles.description}>Movimentações efetivamente registradas.</Text>
-      <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(true)} style={styles.action}>
+      <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(true)} style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}>
         <Text style={styles.actionText}>Registrar saída</Text>
       </Pressable>
       <View style={styles.box}>
@@ -90,10 +90,13 @@ export default function CashScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, gap: spacing[4], padding: spacing[5], backgroundColor: colors.background.canvas },
+  backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center' },
+  backPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   title: { ...typeScale.title, color: colors.content.primary },
   description: { ...typeScale.body, color: colors.content.secondary },
   back: { ...typeScale.bodyStrong, color: colors.interactive.accent },
   action: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  actionPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
   actionText: { ...typeScale.bodyStrong, color: colors.background.canvas },
   box: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
   boxTitle: { ...typeScale.bodyStrong, color: colors.content.secondary },

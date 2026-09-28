@@ -1,8 +1,10 @@
 import { render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 
 import type { ServiceRecord } from '@/data/sqliteTypes';
 import type { PaymentRecord } from '@/data/sqliteTypes';
 import ServiceDetail from '@/features/services/ServiceDetail';
+import { dimensions } from '@/ui/tokens';
 
 const service: ServiceRecord = {
   id: 'service-1',
@@ -46,6 +48,9 @@ describe('service detail', () => {
     expect(getByText('27/09/2026 · Pix')).toBeTruthy();
     expect(getByText('R$ 300,00')).toBeTruthy();
     expect(getByRole('button', { name: 'Compartilhar recibo' })).toBeTruthy();
+    expect(StyleSheet.flatten(getByRole('button', { name: 'Compartilhar recibo' }).props.style)).toMatchObject({
+      minHeight: dimensions.touchTarget,
+    });
     expect(queryByText(/lucro líquido|saldo bancário/i)).toBeNull();
   });
 });

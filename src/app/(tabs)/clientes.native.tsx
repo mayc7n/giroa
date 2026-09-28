@@ -51,7 +51,7 @@ export default function ClientsScreen() {
   if (showForm) {
     return (
       <View style={styles.screen}>
-        <Pressable accessibilityRole="button" onPress={() => setShowForm(false)} style={styles.backButton}>
+        <Pressable accessibilityRole="button" onPress={() => setShowForm(false)} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
           <Text style={styles.backText}>Voltar para clientes</Text>
         </Pressable>
         <ClientForm
@@ -69,7 +69,7 @@ export default function ClientsScreen() {
     <View style={styles.screen}>
       <ClientList clients={clients} onRegister={() => setShowForm(true)} onSelectClient={() => undefined} />
       {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-      <Pressable accessibilityRole="button" onPress={() => router.push('/(tabs)/servicos')} style={styles.secondaryButton}>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/(tabs)/servicos')} style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}>
         <Text style={styles.secondaryText}>Ir para Serviços</Text>
       </Pressable>
     </View>
@@ -79,8 +79,10 @@ export default function ClientsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background.canvas },
   backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center', paddingHorizontal: spacing[5] },
+  backPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   backText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
   error: { ...typeScale.body, color: colors.status.negative, paddingHorizontal: spacing[5], paddingBottom: spacing[3] },
   secondaryButton: { alignSelf: 'flex-start', marginHorizontal: spacing[5], marginBottom: spacing[4], minHeight: dimensions.touchTarget, justifyContent: 'center', borderRadius: radii.md, borderWidth: borders.width, borderColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
+  secondaryPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
   secondaryText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
 });
