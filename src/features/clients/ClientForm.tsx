@@ -6,11 +6,22 @@ import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tok
 type ClientFormProps = {
   onSubmit: (input: { name: string; contact: string | null }) => Promise<void> | void;
   submitting?: boolean;
+  initialContact?: string | null;
+  initialName?: string;
+  submitLabel?: string;
+  title?: string;
 };
 
-export default function ClientForm({ onSubmit, submitting = false }: ClientFormProps) {
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
+export default function ClientForm({
+  onSubmit,
+  submitting = false,
+  initialContact = null,
+  initialName = '',
+  submitLabel = 'Salvar cliente',
+  title = 'Novo cliente',
+}: ClientFormProps) {
+  const [name, setName] = useState(initialName);
+  const [contact, setContact] = useState(initialContact ?? '');
   const [error, setError] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -31,8 +42,8 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Novo cliente</Text>
-        <Text style={styles.description}>Só o nome é necessário para começar.</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.description}>{title === 'Novo cliente' ? 'Só o nome é necessário para começar.' : 'Atualize somente os dados de contato do cliente.'}</Text>
 
         <View style={styles.field}>
           <Text style={styles.label}>Nome</Text>
@@ -76,7 +87,7 @@ export default function ClientForm({ onSubmit, submitting = false }: ClientFormP
           onPress={handleSubmit}
           style={({ pressed }) => [styles.button, pressed && !submitting && styles.buttonPressed, submitting && styles.buttonDisabled]}
         >
-          <Text style={[styles.buttonText, submitting && styles.buttonDisabledText]}>{submitting ? 'Salvando…' : 'Salvar cliente'}</Text>
+          <Text style={[styles.buttonText, submitting && styles.buttonDisabledText]}>{submitting ? 'Salvando…' : submitLabel}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

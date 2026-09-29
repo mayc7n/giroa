@@ -5,6 +5,7 @@ describe('quote use cases', () => {
   function makeDependencies() {
     const clients = {
       create: jest.fn(),
+      update: jest.fn(),
       list: jest.fn(),
       getById: jest.fn(async () => ({ id: 'client-1', name: 'Ana', normalizedName: 'ana', contact: null, createdAt: 'now', updatedAt: 'now' })),
     } satisfies ClientRepository;
@@ -14,6 +15,7 @@ describe('quote use cases', () => {
         id: 'quote-1', clientId: 'client-1', description: 'Instalação', discountCents: 0, validUntil: null,
         status: 'draft' as const, totalCents: 85000, items: [], createdAt: 'now', updatedAt: 'now',
       })),
+      listByClientId: jest.fn(),
       updateStatus: jest.fn(),
     } satisfies QuoteRepository;
     const useCases = createQuoteUseCases({

@@ -48,6 +48,7 @@ function makeUseCases(initialPayments: PaymentRecord[] = [], initialExpenses: Ex
     createFromApprovedQuote: jest.fn(),
     getById: jest.fn(async () => service),
     getByQuoteId: jest.fn(),
+    listByClientId: jest.fn(),
     list: jest.fn(async () => [service]),
   } satisfies ServiceRepository;
   const paymentRepository = {

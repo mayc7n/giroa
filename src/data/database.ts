@@ -16,6 +16,7 @@ import type {
   QuoteRepository,
   ServiceRepository,
   TransactionPort,
+  UpdateClientInput,
 } from '@/application/ports';
 import type {
   ClientRecord,
@@ -140,6 +141,21 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       );
       return input;
     },
+    async update(input: UpdateClientInput): Promise<ClientRecord> {
+      await db.runAsync(
+        `UPDATE clients
+         SET name = ?, normalized_name = ?, contact = ?, updated_at = ?
+         WHERE id = ?`,
+        input.name,
+        input.normalizedName,
+        input.contact,
+        input.updatedAt,
+        input.id,
+      );
+      const row = await db.getFirstAsync<ClientRow>('SELECT * FROM clients WHERE id = ?', input.id);
+      if (!row) throw new Error('Cliente não encontrado.');
+      return mapClient(row);
+    },
     async list() {
       const rows = await db.getAllAsync<ClientRow>('SELECT * FROM clients ORDER BY name COLLATE NOCASE, id');
       return rows.map(mapClient);
@@ -188,6 +204,18 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
       const items = await db.getAllAsync<QuoteItemRow>('SELECT * FROM quote_items WHERE quote_id = ? ORDER BY position', id);
       return mapQuote(row, items);
     },
+    async listByClientId(clientId: string): Promise<QuoteRecord[]> {
+      const rows = await db.getAllAsync<QuoteRow>(
+        'SELECT * FROM quotes WHERE client_id = ? ORDER BY created_at DESC, id DESC',
+        clientId,
+      );
+      const records: QuoteRecord[] = [];
+      for (const row of rows) {
+        const items = await db.getAllAsync<QuoteItemRow>('SELECT * FROM quote_items WHERE quote_id = ? ORDER BY position', row.id);
+        records.push(mapQuote(row, items));
+      }
+      return records;
+    },
     async updateStatus(id: string, status, updatedAt: string): Promise<void> {
       await db.runAsync('UPDATE quotes SET status = ?, updated_at = ? WHERE id = ?', status, updatedAt, id);
     },
@@ -226,6 +254,13 @@ export function createSqliteRepositories(db: SQLiteDatabase): GiroaRepositories 
     async getByQuoteId(quoteId: string): Promise<ServiceRecord | null> {
       const row = await db.getFirstAsync<ServiceRow>('SELECT * FROM services WHERE quote_id = ?', quoteId);
       return row ? mapService(row) : null;
+    },
+    async listByClientId(clientId: string): Promise<ServiceRecord[]> {
+      const rows = await db.getAllAsync<ServiceRow>(
+        'SELECT * FROM services WHERE client_id = ? ORDER BY created_at DESC, id DESC',
+        clientId,
+      );
+      return rows.map(mapService);
     },
     async list(): Promise<ServiceRecord[]> {
       const rows = await db.getAllAsync<ServiceRow>('SELECT * FROM services ORDER BY created_at, id');

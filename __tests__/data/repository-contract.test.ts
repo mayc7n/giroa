@@ -39,6 +39,15 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
           string,
         ];
         state.clients.push({ id, name, normalized_name: normalizedName, contact, created_at: createdAt, updated_at: updatedAt });
+      } else if (sql.includes('UPDATE clients')) {
+        const [name, normalizedName, contact, updatedAt, id] = params as [string, string, string | null, string, string];
+        const client = state.clients.find((row) => row.id === id);
+        if (client) {
+          client.name = name;
+          client.normalized_name = normalizedName;
+          client.contact = contact;
+          client.updated_at = updatedAt;
+        }
       } else if (sql.includes('INSERT INTO quotes')) {
         const [id, clientId, description, discountCents, validUntil, status, totalCents, createdAt, updatedAt] = params as [
           string,
@@ -121,7 +130,9 @@ function createFakeDatabase(state: FakeState): SQLiteDatabase {
     getAllAsync: jest.fn(async (sql: string, ...params: unknown[]) => {
       const [value] = params;
       if (sql.includes('FROM clients')) return state.clients;
+      if (sql.includes('FROM quotes WHERE client_id')) return state.quotes.filter((row) => row.client_id === value);
       if (sql.includes('FROM quote_items')) return state.quoteItems.filter((row) => row.quote_id === value);
+      if (sql.includes('FROM services WHERE client_id')) return state.services.filter((row) => row.client_id === value);
       if (sql.includes('FROM payments')) return state.payments.filter((row) => row.service_id === value);
       if (sql.includes('FROM expenses')) return state.expenses;
       return [];
@@ -147,6 +158,20 @@ describe('SQLite repository contracts', () => {
     });
     expect((await repositories.clients.list())[0].name).toBe('Ana Souza');
 
+    await repositories.clients.update({
+      id: 'client-1',
+      name: 'Ana Lima',
+      normalizedName: 'ana lima',
+      contact: '222',
+      updatedAt: '2026-09-28T12:00:00.000Z',
+    });
+    expect(await repositories.clients.getById('client-1')).toMatchObject({
+      name: 'Ana Lima',
+      normalizedName: 'ana lima',
+      contact: '222',
+      createdAt: '2026-09-27T12:00:00.000Z',
+    });
+
     await repositories.quotes.create({
       id: 'quote-1',
       clientId: 'client-1',
@@ -160,6 +185,7 @@ describe('SQLite repository contracts', () => {
       updatedAt: '2026-09-27T12:00:00.000Z',
     });
     expect((await repositories.quotes.getById('quote-1'))?.items[0].totalCents).toBe(85000);
+    expect((await repositories.quotes.listByClientId('client-1'))[0].id).toBe('quote-1');
 
     const serviceInput = {
       id: 'service-1',
@@ -174,6 +200,7 @@ describe('SQLite repository contracts', () => {
     const firstService = await repositories.services.createFromApprovedQuote(serviceInput);
     const repeatedService = await repositories.services.createFromApprovedQuote(serviceInput);
     expect(repeatedService.id).toBe(firstService.id);
+    expect((await repositories.services.listByClientId('client-1'))[0].id).toBe('service-1');
 
     const paymentInput = {
       id: 'payment-1',

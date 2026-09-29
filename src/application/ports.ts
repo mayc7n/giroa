@@ -19,6 +19,14 @@ export type CreateClientInput = {
   updatedAt: string;
 };
 
+export type UpdateClientInput = {
+  id: string;
+  name: string;
+  normalizedName: string;
+  contact: string | null;
+  updatedAt: string;
+};
+
 export type CreateQuoteInput = Omit<QuoteRecord, 'items'> & {
   items: QuoteRecord['items'];
 };
@@ -66,6 +74,7 @@ export interface TransactionPort {
 
 export interface ClientRepository {
   create(input: CreateClientInput): Promise<ClientRecord>;
+  update(input: UpdateClientInput): Promise<ClientRecord>;
   list(): Promise<ClientSummary[]>;
   getById(id: string): Promise<ClientRecord | null>;
 }
@@ -73,6 +82,7 @@ export interface ClientRepository {
 export interface QuoteRepository {
   create(input: CreateQuoteInput): Promise<QuoteRecord>;
   getById(id: string): Promise<QuoteRecord | null>;
+  listByClientId(clientId: string): Promise<QuoteRecord[]>;
   updateStatus(id: string, status: QuoteStatus, updatedAt: string): Promise<void>;
 }
 
@@ -80,6 +90,7 @@ export interface ServiceRepository {
   createFromApprovedQuote(input: CreateServiceInput): Promise<ServiceRecord>;
   getById(id: string): Promise<ServiceRecord | null>;
   getByQuoteId(quoteId: string): Promise<ServiceRecord | null>;
+  listByClientId(clientId: string): Promise<ServiceRecord[]>;
   list(): Promise<ServiceRecord[]>;
 }
 

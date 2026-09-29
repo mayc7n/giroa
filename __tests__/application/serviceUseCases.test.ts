@@ -34,12 +34,14 @@ function makeUseCases(quote: QuoteRecord, existing: ServiceRecord | null = null)
   const quotes = {
     create: jest.fn(),
     getById: jest.fn(async () => quote),
+    listByClientId: jest.fn(),
     updateStatus: jest.fn(),
   } satisfies QuoteRepository;
   const services = {
     createFromApprovedQuote: jest.fn(async () => makeService()),
     getById: jest.fn(),
     getByQuoteId: jest.fn(async () => existing),
+    listByClientId: jest.fn(),
     list: jest.fn(async () => []),
   } satisfies ServiceRepository;
 
