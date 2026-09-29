@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { createPaymentUseCases } from '@/application/paymentUseCases';
 import { createExpenseUseCases } from '@/application/expenseUseCases';
+import { createPaymentUseCases, type CashMovement, type CashSummary } from '@/application/paymentUseCases';
 import { createRuntimeId, currentCivilMonthPeriod, currentInstant } from '@/application/runtime';
 import { createSqliteRepositories } from '@/data/database';
-import { formatCentsToBRL, formatSignedCentsToBRL } from '@/domain/money';
+import CashScreen from '@/features/cash/CashScreen';
 import ExpenseForm from '@/features/expenses/ExpenseForm';
-import { colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
+import { colors, dimensions, spacing, typeScale } from '@/ui/tokens';
 
-export default function CashScreen() {
+export default function CashNativeScreen() {
   const db = useSQLiteContext();
   const repositories = useMemo(() => createSqliteRepositories(db), [db]);
   const paymentUseCases = useMemo(() => createPaymentUseCases({
@@ -25,23 +25,38 @@ export default function CashScreen() {
     idFactory: () => createRuntimeId('expense'),
     clock: currentInstant,
   }), [repositories.expenses]);
-  const [summary, setSummary] = useState({ entriesCents: 0, exitsCents: 0, periodBalanceCents: 0, pendingCents: 0 });
+  const [summary, setSummary] = useState<CashSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
 
-  async function loadSummary() {
-    const nextSummary = await paymentUseCases.getCashSummary(currentCivilMonthPeriod());
-    setSummary(nextSummary);
-  }
+  const loadSummary = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const nextSummary = await paymentUseCases.getCashSummary(currentCivilMonthPeriod());
+      setSummary(nextSummary);
+      setError(null);
+    } catch (summaryError) {
+      setError(summaryError instanceof Error ? summaryError.message : 'Não foi possível carregar o caixa. Tente novamente.');
+      throw summaryError;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [paymentUseCases]);
 
   useEffect(() => {
     let active = true;
     paymentUseCases.getCashSummary(currentCivilMonthPeriod())
       .then((nextSummary) => {
-        if (active) setSummary(nextSummary);
+        if (!active) return;
+        setSummary(nextSummary);
+        setError(null);
       })
-      .catch(() => {
-        if (active) setError('Não foi possível carregar o caixa. Tente novamente.');
+      .catch((summaryError) => {
+        if (active) setError(summaryError instanceof Error ? summaryError.message : 'Não foi possível carregar o caixa. Tente novamente.');
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
       });
 
     return () => {
@@ -49,11 +64,25 @@ export default function CashScreen() {
     };
   }, [paymentUseCases]);
 
+  async function handleReverseMovement(movement: CashMovement): Promise<void> {
+    try {
+      setError(null);
+      if (movement.kind === 'entry') {
+        await paymentUseCases.reversePayment(movement.id);
+      } else {
+        await expenseUseCases.reverse(movement.id);
+      }
+      await loadSummary();
+    } catch (reversalError) {
+      setError(reversalError instanceof Error ? reversalError.message : 'Não foi possível estornar a movimentação.');
+    }
+  }
+
   if (showExpenseForm) {
     return (
-      <View style={styles.screen}>
+      <View style={styles.formScreen}>
         <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(false)} style={({ pressed }) => [styles.backButton, pressed && styles.backPressed]}>
-          <Text style={styles.back}>Voltar para Caixa</Text>
+          <Text style={styles.backText}>Voltar para Caixa</Text>
         </Pressable>
         <ExpenseForm
           onSubmit={async (input) => {
@@ -67,43 +96,20 @@ export default function CashScreen() {
   }
 
   return (
-    <View style={styles.screen}>
-      <Text style={styles.title}>Caixa</Text>
-      <Text style={styles.description}>Movimentações efetivamente registradas.</Text>
-      <Pressable accessibilityRole="button" onPress={() => setShowExpenseForm(true)} style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}>
-        <Text style={styles.actionText}>Registrar saída</Text>
-      </Pressable>
-      <View style={styles.box}>
-        <Text style={styles.boxTitle}>Saldo do período</Text>
-        <Text style={styles.total}>{formatSignedCentsToBRL(summary.periodBalanceCents)}</Text>
-        <Text style={styles.line}>Entradas {formatCentsToBRL(summary.entriesCents)}</Text>
-        <Text style={styles.line}>Saídas {formatCentsToBRL(summary.exitsCents)}</Text>
-      </View>
-      <View style={styles.pendingBox}>
-        <Text style={styles.pendingTitle}>Valores a receber</Text>
-        <Text style={styles.pending}>{formatCentsToBRL(summary.pendingCents)}</Text>
-      </View>
-      {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-    </View>
+    <CashScreen
+      summary={summary}
+      isLoading={isLoading}
+      error={error}
+      onRetry={() => { void loadSummary().catch(() => undefined); }}
+      onRegisterExpense={() => setShowExpenseForm(true)}
+      onReverseMovement={handleReverseMovement}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, gap: spacing[4], padding: spacing[5], backgroundColor: colors.background.canvas },
-  backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center' },
+  formScreen: { flex: 1, backgroundColor: colors.background.canvas },
+  backButton: { minHeight: dimensions.touchTarget, justifyContent: 'center', paddingHorizontal: spacing[5] },
   backPressed: { backgroundColor: colors.background.pressed, opacity: 0.92 },
-  title: { ...typeScale.title, color: colors.content.primary },
-  description: { ...typeScale.body, color: colors.content.secondary },
-  back: { ...typeScale.bodyStrong, color: colors.interactive.accent },
-  action: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },
-  actionPressed: { backgroundColor: colors.interactive.accentPressed, opacity: 0.92 },
-  actionText: { ...typeScale.bodyStrong, color: colors.background.canvas },
-  box: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.elevated },
-  boxTitle: { ...typeScale.bodyStrong, color: colors.content.secondary },
-  total: { ...typeScale.money, color: colors.content.primary },
-  line: { ...typeScale.body, color: colors.content.secondary },
-  pendingBox: { gap: spacing[2], padding: spacing[4], borderRadius: radii.lg, backgroundColor: colors.background.surface },
-  pendingTitle: { ...typeScale.bodyStrong, color: colors.status.pending },
-  pending: { ...typeScale.money, color: colors.status.pending },
-  error: { ...typeScale.body, color: colors.status.negative },
+  backText: { ...typeScale.bodyStrong, color: colors.interactive.accent },
 });

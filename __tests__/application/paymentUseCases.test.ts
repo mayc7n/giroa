@@ -1,4 +1,4 @@
-import type { PaymentRepository, ServiceRepository } from '@/application/ports';
+import type { ExpenseRepository, PaymentRepository, ServiceRepository } from '@/application/ports';
 import type { ExpenseRecord, PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
 import { createPaymentUseCases } from '@/application/paymentUseCases';
 
@@ -27,7 +27,7 @@ function makePayment(id: string, amountCents: number, operationId: string): Paym
   };
 }
 
-function makeExpense(id: string, amountCents: number, expenseDate: string): ExpenseRecord {
+function makeExpense(id: string, amountCents: number, expenseDate: string, status: ExpenseRecord['status'] = 'active'): ExpenseRecord {
   return {
     id,
     description: 'Material',
@@ -35,9 +35,9 @@ function makeExpense(id: string, amountCents: number, expenseDate: string): Expe
     expenseDate,
     category: 'material',
     clientOperationId: `expense-operation-${id}`,
-    status: 'active',
+    status,
     createdAt: '2026-09-27T13:00:00.000Z',
-    reversedAt: null,
+    reversedAt: status === 'reversed' ? '2026-09-27T14:00:00.000Z' : null,
   };
 }
 
@@ -71,8 +71,14 @@ function makeUseCases(initialPayments: PaymentRecord[] = [], initialExpenses: Ex
     create: jest.fn(),
     getByOperationId: jest.fn(),
     listAll: jest.fn(async () => expenses),
-    reverse: jest.fn(),
-  };
+    reverse: jest.fn(async (id: string, reversedAt: string) => {
+      const record = expenses.find((expense) => expense.id === id);
+      if (!record) throw new Error('Despesa não encontrada.');
+      const reversed = { ...record, status: 'reversed' as const, reversedAt };
+      expenses.splice(expenses.indexOf(record), 1, reversed);
+      return reversed;
+    }),
+  } satisfies ExpenseRepository;
 
   return {
     payments,
@@ -172,6 +178,49 @@ describe('payment use cases', () => {
       entriesCents: 30000,
       exitsCents: 7000,
       periodBalanceCents: 23000,
+    });
+  });
+
+  it('lists active and reversed movements with a negative period balance', async () => {
+    const activePayment = makePayment('payment-1', 30000, 'operation-1');
+    const reversedPayment = { ...makePayment('payment-2', 90000, 'operation-2'), status: 'reversed' as const, reversedAt: '2026-09-27T14:00:00.000Z' };
+    const activeExpense = makeExpense('expense-1', 50000, '2026-09-27');
+    const reversedExpense = makeExpense('expense-2', 40000, '2026-09-27', 'reversed');
+    const { useCases } = makeUseCases([activePayment, reversedPayment], [activeExpense, reversedExpense]);
+
+    const summary = await useCases.getCashSummary({ startDate: '2026-09-01', endDate: '2026-09-30' });
+
+    expect(summary).toMatchObject({
+      entriesCents: 30000,
+      exitsCents: 50000,
+      periodBalanceCents: -20000,
+    });
+    expect(summary.movements).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'payment-1', kind: 'entry', description: 'Instalação', category: 'pix', amountCents: 30000, status: 'active' }),
+      expect.objectContaining({ id: 'payment-2', kind: 'entry', status: 'reversed' }),
+      expect.objectContaining({ id: 'expense-1', kind: 'exit', description: 'Material', category: 'material', amountCents: 50000, status: 'active' }),
+      expect.objectContaining({ id: 'expense-2', kind: 'exit', status: 'reversed' }),
+    ]));
+    expect(summary.movements).toHaveLength(4);
+  });
+
+  it('updates the cash summary immediately after reversing a payment', async () => {
+    const { useCases } = makeUseCases(
+      [makePayment('payment-1', 30000, 'operation-1')],
+      [makeExpense('expense-1', 10000, '2026-09-27')],
+    );
+
+    await expect(useCases.getCashSummary({ startDate: '2026-09-01', endDate: '2026-09-30' })).resolves.toMatchObject({
+      periodBalanceCents: 20000,
+    });
+
+    await useCases.reversePayment('payment-1');
+
+    await expect(useCases.getCashSummary({ startDate: '2026-09-01', endDate: '2026-09-30' })).resolves.toMatchObject({
+      entriesCents: 0,
+      exitsCents: 10000,
+      periodBalanceCents: -10000,
+      movements: expect.arrayContaining([expect.objectContaining({ id: 'payment-1', status: 'reversed' })]),
     });
   });
 

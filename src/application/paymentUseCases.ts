@@ -1,6 +1,7 @@
 import { calculateBalance, validatePaymentAmount } from '@/domain/payment';
+import { calculateNetCashBalance, sumActiveCents } from '@/domain/cash';
 import { assertISODate } from '@/domain/date';
-import type { PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
+import type { ExpenseRecord, PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
 import type { ExpenseRepository, PaymentRepository, ServiceRepository } from './ports';
 
 type PaymentUseCaseDependencies = {
@@ -18,6 +19,56 @@ export type ServiceFinancialSummary = {
   receivedCents: number;
   balanceCents: number;
 };
+
+export type CashMovement = {
+  id: string;
+  date: string;
+  description: string;
+  category: string;
+  amountCents: number;
+  kind: 'entry' | 'exit';
+  status: 'active' | 'reversed';
+};
+
+export type CashSummary = {
+  entriesCents: number;
+  exitsCents: number;
+  periodBalanceCents: number;
+  pendingCents: number;
+  movements: CashMovement[];
+};
+
+function isWithinPeriod(date: string, period: { startDate: string; endDate: string }): boolean {
+  return date >= period.startDate && date <= period.endDate;
+}
+
+function createCashMovements(
+  payments: PaymentRecord[],
+  expenses: ExpenseRecord[],
+  services: ServiceRecord[],
+): CashMovement[] {
+  const serviceDescriptions = new Map(services.map((service) => [service.id, service.description]));
+  return [
+    ...payments.map((payment) => ({
+      id: payment.id,
+      date: payment.paymentDate,
+      description: serviceDescriptions.get(payment.serviceId) ?? 'Recebimento',
+      category: payment.method,
+      amountCents: payment.amountCents,
+      kind: 'entry' as const,
+      status: payment.status,
+    })),
+    ...expenses.map((expense) => ({
+      id: expense.id,
+      date: expense.expenseDate,
+      description: expense.description,
+      category: expense.category,
+      amountCents: expense.amountCents,
+      kind: 'exit' as const,
+      status: expense.status,
+    })),
+  ].sort((left, right) => right.date.localeCompare(left.date) || right.id.localeCompare(left.id));
+}
 
 export function createPaymentUseCases({ services, payments, expenses, idFactory, clock }: PaymentUseCaseDependencies) {
   return {
@@ -74,7 +125,7 @@ export function createPaymentUseCases({ services, payments, expenses, idFactory,
     async reversePayment(paymentId: string) {
       return payments.reverse(paymentId, clock());
     },
-    async getCashSummary(period: { startDate: string; endDate: string }) {
+    async getCashSummary(period: { startDate: string; endDate: string }): Promise<CashSummary> {
       assertISODate(period.startDate);
       assertISODate(period.endDate);
       if (period.startDate > period.endDate) throw new Error('O período do caixa é inválido.');
@@ -82,29 +133,21 @@ export function createPaymentUseCases({ services, payments, expenses, idFactory,
       const allServices = await services.list();
       const allPayments = await payments.listAll();
       const allExpenses = expenses ? await expenses.listAll() : [];
-      const activePayments = allPayments.filter((payment) => (
-        payment.status === 'active'
-        && payment.paymentDate >= period.startDate
-        && payment.paymentDate <= period.endDate
-      ));
+      const periodPayments = allPayments.filter((payment) => isWithinPeriod(payment.paymentDate, period));
+      const periodExpenses = allExpenses.filter((expense) => isWithinPeriod(expense.expenseDate, period));
       const pendingCents = allServices.reduce((total, service) => {
         const servicePayments = allPayments.filter((payment) => payment.serviceId === service.id);
         return total + calculateBalance(service.totalCents, servicePayments);
       }, 0);
-      const entriesCents = activePayments.reduce((total, payment) => total + payment.amountCents, 0);
-      const exitsCents = allExpenses
-        .filter((expense) => (
-          expense.status === 'active'
-          && expense.expenseDate >= period.startDate
-          && expense.expenseDate <= period.endDate
-        ))
-        .reduce((total, expense) => total + expense.amountCents, 0);
+      const entriesCents = sumActiveCents(periodPayments);
+      const exitsCents = sumActiveCents(periodExpenses);
 
       return {
         entriesCents,
         exitsCents,
-        periodBalanceCents: entriesCents - exitsCents,
+        periodBalanceCents: calculateNetCashBalance(periodPayments, periodExpenses),
         pendingCents,
+        movements: createCashMovements(periodPayments, periodExpenses, allServices),
       };
     },
   };
