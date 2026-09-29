@@ -45,3 +45,12 @@ export function formatCentsToBRL(cents: number): string {
 
   return `R$ ${integerPart},${decimalPart}`;
 }
+
+export function formatSignedCentsToBRL(cents: number): string {
+  if (!Number.isSafeInteger(cents)) {
+    throw new Error('O valor deve ser um número inteiro de centavos.');
+  }
+
+  const sign = cents < 0 ? '-' : '';
+  return `${sign}${formatCentsToBRL(Math.abs(cents))}`;
+}

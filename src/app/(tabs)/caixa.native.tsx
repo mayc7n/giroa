@@ -6,7 +6,7 @@ import { createPaymentUseCases } from '@/application/paymentUseCases';
 import { createExpenseUseCases } from '@/application/expenseUseCases';
 import { createRuntimeId, currentCivilMonthPeriod, currentInstant } from '@/application/runtime';
 import { createSqliteRepositories } from '@/data/database';
-import { formatCentsToBRL } from '@/domain/money';
+import { formatCentsToBRL, formatSignedCentsToBRL } from '@/domain/money';
 import ExpenseForm from '@/features/expenses/ExpenseForm';
 import { colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
@@ -75,7 +75,7 @@ export default function CashScreen() {
       </Pressable>
       <View style={styles.box}>
         <Text style={styles.boxTitle}>Saldo do período</Text>
-        <Text style={styles.total}>{formatCentsToBRL(summary.periodBalanceCents)}</Text>
+        <Text style={styles.total}>{formatSignedCentsToBRL(summary.periodBalanceCents)}</Text>
         <Text style={styles.line}>Entradas {formatCentsToBRL(summary.entriesCents)}</Text>
         <Text style={styles.line}>Saídas {formatCentsToBRL(summary.exitsCents)}</Text>
       </View>

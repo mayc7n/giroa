@@ -1,5 +1,5 @@
-import TodayScreen from '@/features/today/TodayScreen';
+import TodayDashboard from '@/features/today/TodayDashboard';
 
 export default function TodayNativeScreen() {
-  return <TodayScreen />;
+  return <TodayDashboard />;
 }

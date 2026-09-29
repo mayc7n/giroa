@@ -1,4 +1,4 @@
-import { formatCentsToBRL, parseMoneyToCents } from '@/domain/money';
+import { formatCentsToBRL, formatSignedCentsToBRL, parseMoneyToCents } from '@/domain/money';
 
 describe('money', () => {
   it('converts Brazilian money input to integer cents', () => {
@@ -17,5 +17,9 @@ describe('money', () => {
 
   it('formats integer cents as Brazilian reais', () => {
     expect(formatCentsToBRL(85000)).toBe('R$ 850,00');
+  });
+
+  it('formats a negative balance without accepting negative input money', () => {
+    expect(formatSignedCentsToBRL(-12500)).toBe('-R$ 125,00');
   });
 });
