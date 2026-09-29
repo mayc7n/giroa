@@ -1,7 +1,9 @@
 import { act, render, waitFor } from '@testing-library/react-native';
 
+import ServicesScreen from '@/app/(tabs)/servicos.native';
+
 const mockFocusListeners = new Set<() => void>();
-const mockClientsList = jest.fn(async () => [{ id: 'client-1', name: 'Ana Souza' }]);
+const mockClientsList = jest.fn(async () => [{ id: 'client-1', name: 'Ana Souza', contact: null }]);
 const mockServicesList = jest.fn(async () => [{
   id: 'service-1',
   clientId: 'client-1',
@@ -12,8 +14,7 @@ const mockServicesList = jest.fn(async () => [{
   createdAt: '2026-09-20T12:00:00.000Z',
   updatedAt: '2026-09-27T12:00:00.000Z',
 }]);
-const mockPaymentsListAll = jest.fn(async () => []);
-const mockExpensesListAll = jest.fn(async () => []);
+const mockDatabase = {};
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -42,52 +43,57 @@ jest.mock('expo-router', () => {
   };
 });
 
-jest.mock('expo-sqlite', () => {
-  const database = {};
-  return {
-    useSQLiteContext: () => database,
-  };
-});
+jest.mock('expo-sqlite', () => ({
+  useSQLiteContext: () => mockDatabase,
+}));
 
 jest.mock('@/data/database', () => ({
   createSqliteRepositories: () => ({
-    clients: {
-      list: mockClientsList,
-    },
-    services: {
-      list: mockServicesList,
-    },
-    payments: { listAll: mockPaymentsListAll },
-    expenses: { listAll: mockExpensesListAll },
+    clients: { list: mockClientsList },
+    services: { list: mockServicesList },
+    quotes: {},
+    payments: {},
   }),
 }));
 
-jest.mock('@/features/today/TodayScreen', () => {
-  const React = require('react');
-  const { Text: MockText } = require('react-native');
+jest.mock('@/application/quoteUseCases', () => ({
+  createQuoteUseCases: () => ({
+    create: jest.fn(),
+    approve: jest.fn(),
+  }),
+}));
 
-  return function MockTodayScreen({ summary, isLoading }: { summary: { pendingCents: number } | null; isLoading: boolean }) {
-    return React.createElement(MockText, null, summary ? `loaded:${summary.pendingCents}` : isLoading ? 'loading' : 'empty');
+jest.mock('@/application/serviceUseCases', () => ({
+  createServiceUseCases: () => ({
+    createFromApprovedQuote: jest.fn(),
+  }),
+}));
+
+jest.mock('@/application/paymentUseCases', () => ({
+  createPaymentUseCases: () => ({
+    getServiceFinancialSummary: jest.fn(),
+    register: jest.fn(),
+  }),
+}));
+
+jest.mock('@/features/services/ServiceList', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+
+  return function MockServiceList() {
+    return React.createElement(Text, null, 'services-loaded');
   };
 });
 
-import TodayDashboard from '@/features/today/TodayDashboard';
-
-describe('TodayDashboard', () => {
+describe('native services focus refresh', () => {
   afterEach(() => {
     mockFocusListeners.clear();
     jest.clearAllMocks();
   });
 
-  it('loads local records and passes the summary to the screen', async () => {
-    const { findByText } = render(<TodayDashboard />);
-
-    expect(await findByText('loaded:50000')).toBeTruthy();
-  });
-
-  it('reloads local records when the tab receives focus again', async () => {
-    const { findByText } = render(<TodayDashboard />);
-    expect(await findByText('loaded:50000')).toBeTruthy();
+  it('reloads clients and services when the tab receives focus again', async () => {
+    const { findByText } = render(<ServicesScreen />);
+    expect(await findByText('services-loaded')).toBeTruthy();
 
     await act(async () => {
       mockFocusListeners.forEach((listener) => listener());
@@ -96,8 +102,6 @@ describe('TodayDashboard', () => {
     await waitFor(() => {
       expect(mockClientsList).toHaveBeenCalledTimes(2);
       expect(mockServicesList).toHaveBeenCalledTimes(2);
-      expect(mockPaymentsListAll).toHaveBeenCalledTimes(2);
-      expect(mockExpensesListAll).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { createExpenseUseCases } from '@/application/expenseUseCases';
@@ -30,39 +31,35 @@ export default function CashNativeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
 
-  const loadSummary = useCallback(async () => {
-    setIsLoading(true);
+  const refreshSummary = useCallback(async (isActive: () => boolean, showLoading: boolean) => {
+    if (showLoading) setIsLoading(true);
     try {
       const nextSummary = await paymentUseCases.getCashSummary(currentCivilMonthPeriod());
+      if (!isActive()) return;
       setSummary(nextSummary);
       setError(null);
     } catch (summaryError) {
-      setError(summaryError instanceof Error ? summaryError.message : 'Não foi possível carregar o caixa. Tente novamente.');
+      if (isActive()) {
+        setError(summaryError instanceof Error ? summaryError.message : 'Não foi possível carregar o caixa. Tente novamente.');
+      }
       throw summaryError;
     } finally {
-      setIsLoading(false);
+      if (isActive()) setIsLoading(false);
     }
   }, [paymentUseCases]);
 
-  useEffect(() => {
+  const loadSummary = useCallback(async () => {
+    await refreshSummary(() => true, true);
+  }, [refreshSummary]);
+
+  useFocusEffect(useCallback(() => {
     let active = true;
-    paymentUseCases.getCashSummary(currentCivilMonthPeriod())
-      .then((nextSummary) => {
-        if (!active) return;
-        setSummary(nextSummary);
-        setError(null);
-      })
-      .catch((summaryError) => {
-        if (active) setError(summaryError instanceof Error ? summaryError.message : 'Não foi possível carregar o caixa. Tente novamente.');
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+    void refreshSummary(() => active, false).catch(() => undefined);
 
     return () => {
       active = false;
     };
-  }, [paymentUseCases]);
+  }, [refreshSummary]));
 
   async function handleReverseMovement(movement: CashMovement): Promise<void> {
     try {

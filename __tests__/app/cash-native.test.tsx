@@ -9,6 +9,16 @@ const mockReversePayment = jest.fn();
 const mockReverseExpense = jest.fn();
 const mockDatabase = {};
 
+jest.mock('expo-router', () => {
+  const React = require('react');
+
+  return {
+    useFocusEffect: (effect: () => void | (() => void)) => {
+      React.useEffect(effect, [effect]);
+    },
+  };
+});
+
 jest.mock('expo-sqlite', () => ({
   useSQLiteContext: () => mockDatabase,
 }));

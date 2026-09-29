@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { createPaymentUseCases } from '@/application/paymentUseCases';
@@ -50,23 +50,27 @@ export default function ServicesScreen() {
   const [showNewQuote, setShowNewQuote] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    Promise.all([repositories.clients.list(), repositories.services.list()])
+  const loadServices = useCallback(
+    (isActive: () => boolean) => Promise.all([repositories.clients.list(), repositories.services.list()])
       .then(([nextClients, nextServices]) => {
-        if (!active) return;
+        if (!isActive()) return;
         setClients(nextClients);
         setSavedServices(nextServices);
         setError(null);
       })
       .catch(() => {
-        if (active) setError('Não foi possível carregar os serviços. Tente novamente.');
-      });
+        if (isActive()) setError('Não foi possível carregar os serviços. Tente novamente.');
+      }),
+    [repositories.clients, repositories.services],
+  );
 
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void loadServices(() => active);
     return () => {
       active = false;
     };
-  }, [repositories.clients, repositories.services]);
+  }, [loadServices]));
 
   async function loadServiceSummary(serviceId: string) {
     const nextSummary = await paymentUseCases.getServiceFinancialSummary(serviceId);

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { currentCivilMonthPeriod } from '@/application/runtime';
@@ -23,14 +23,16 @@ export default function TodayDashboard() {
 
   const fetchSummary = useCallback(() => useCases.getSummary(), [useCases]);
 
-  const loadSummary = useCallback(async () => {
+  const loadSummary = useCallback(async (isActive: () => boolean = () => true) => {
     try {
-      setSummary(await fetchSummary());
+      const nextSummary = await fetchSummary();
+      if (!isActive()) return;
+      setSummary(nextSummary);
       setError(null);
     } catch {
-      setError('Não foi possível carregar os registros locais. Tente novamente.');
+      if (isActive()) setError('Não foi possível carregar os registros locais. Tente novamente.');
     } finally {
-      setIsLoading(false);
+      if (isActive()) setIsLoading(false);
     }
   }, [fetchSummary]);
 
@@ -39,25 +41,14 @@ export default function TodayDashboard() {
     void loadSummary();
   }, [loadSummary]);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     let active = true;
-    fetchSummary()
-      .then((nextSummary) => {
-        if (!active) return;
-        setSummary(nextSummary);
-        setError(null);
-      })
-      .catch(() => {
-        if (active) setError('Não foi possível carregar os registros locais. Tente novamente.');
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+    void loadSummary(() => active);
 
     return () => {
       active = false;
     };
-  }, [fetchSummary]);
+  }, [loadSummary]));
 
   return (
     <TodayScreen
