@@ -1,3 +1,4 @@
+import * as mockReact from 'react';
 import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
@@ -10,11 +11,9 @@ const mockReverseExpense = jest.fn();
 const mockDatabase = {};
 
 jest.mock('expo-router', () => {
-  const React = require('react');
-
   return {
     useFocusEffect: (effect: () => void | (() => void)) => {
-      React.useEffect(effect, [effect]);
+      mockReact.useEffect(effect, [effect]);
     },
   };
 });

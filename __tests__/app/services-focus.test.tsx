@@ -1,3 +1,5 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { act, render, waitFor } from '@testing-library/react-native';
 
 import ServicesScreen from '@/app/(tabs)/servicos.native';
@@ -17,14 +19,12 @@ const mockServicesList = jest.fn(async () => [{
 const mockDatabase = {};
 
 jest.mock('expo-router', () => {
-  const React = require('react');
-
   return {
     router: { push: jest.fn() },
     useFocusEffect: (effect: () => void | (() => void)) => {
-      const effectRef = React.useRef(effect);
+      const effectRef = mockReact.useRef(effect);
       effectRef.current = effect;
-      React.useEffect(() => {
+      mockReact.useEffect(() => {
         let cleanup: (() => void) | undefined;
         const run = () => {
           cleanup?.();
@@ -77,11 +77,8 @@ jest.mock('@/application/paymentUseCases', () => ({
 }));
 
 jest.mock('@/features/services/ServiceList', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-
   return function MockServiceList() {
-    return React.createElement(Text, null, 'services-loaded');
+    return mockReact.createElement(mockText, null, 'services-loaded');
   };
 });
 

@@ -1,15 +1,14 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { render } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => {
-  const React = require('react');
-  const { Text: MockText } = require('react-native');
+import HomeScreen from '@/app/index';
 
+jest.mock('expo-router', () => {
   return {
-    Redirect: ({ href }: { href: string }) => React.createElement(MockText, { testID: 'home-route-target' }, href),
+    Redirect: ({ href }: { href: string }) => mockReact.createElement(mockText, { testID: 'home-route-target' }, href),
   };
 });
-
-import HomeScreen from '@/app/index';
 
 describe('rota inicial', () => {
   it('redireciona a raiz para Hoje dentro da navegação por abas', () => {

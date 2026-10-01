@@ -20,6 +20,8 @@ ios/
 
 # Private planning, prompts and checkpoints
 docs/
+design.md
+melhorias.txt
 CHECKPOINT.md
 CHECKPOINT-*.md
 *.local.*

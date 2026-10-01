@@ -1,4 +1,8 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { act, render, waitFor } from '@testing-library/react-native';
+
+import TodayDashboard from '@/features/today/TodayDashboard';
 
 const mockFocusListeners = new Set<() => void>();
 const mockClientsList = jest.fn(async () => [{ id: 'client-1', name: 'Ana Souza' }]);
@@ -16,14 +20,12 @@ const mockPaymentsListAll = jest.fn(async () => []);
 const mockExpensesListAll = jest.fn(async () => []);
 
 jest.mock('expo-router', () => {
-  const React = require('react');
-
   return {
     router: { push: jest.fn() },
     useFocusEffect: (effect: () => void | (() => void)) => {
-      const effectRef = React.useRef(effect);
+      const effectRef = mockReact.useRef(effect);
       effectRef.current = effect;
-      React.useEffect(() => {
+      mockReact.useEffect(() => {
         let cleanup: (() => void) | undefined;
         const run = () => {
           cleanup?.();
@@ -63,15 +65,10 @@ jest.mock('@/data/database', () => ({
 }));
 
 jest.mock('@/features/today/TodayScreen', () => {
-  const React = require('react');
-  const { Text: MockText } = require('react-native');
-
   return function MockTodayScreen({ summary, isLoading }: { summary: { pendingCents: number } | null; isLoading: boolean }) {
-    return React.createElement(MockText, null, summary ? `loaded:${summary.pendingCents}` : isLoading ? 'loading' : 'empty');
+    return mockReact.createElement(mockText, null, summary ? `loaded:${summary.pendingCents}` : isLoading ? 'loading' : 'empty');
   };
 });
-
-import TodayDashboard from '@/features/today/TodayDashboard';
 
 describe('TodayDashboard', () => {
   afterEach(() => {

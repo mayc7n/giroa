@@ -1,17 +1,16 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { render } from '@testing-library/react-native';
 
-jest.mock('@expo/vector-icons', () => {
-  const React = require('react');
-  const { Text: MockText } = require('react-native');
+import { tabBarIcon } from '@/ui/tabBar';
 
+jest.mock('@expo/vector-icons', () => {
   return {
     Ionicons: ({ name, color, size }: { name: string; color: string; size: number }) => (
-      React.createElement(MockText, null, `${name}:${color}:${size}`)
+      mockReact.createElement(mockText, null, `${name}:${color}:${size}`)
     ),
   };
 });
-
-import { tabBarIcon } from '@/ui/tabBar';
 
 describe('barra de navegação', () => {
   it('usa ícones semânticos para cada área e diferencia o estado ativo', () => {

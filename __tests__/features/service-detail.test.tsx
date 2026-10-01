@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
-import type { ServiceRecord } from '@/data/sqliteTypes';
-import type { PaymentRecord } from '@/data/sqliteTypes';
+import type { PaymentRecord, ServiceRecord } from '@/data/sqliteTypes';
 import ServiceDetail from '@/features/services/ServiceDetail';
 import { dimensions } from '@/ui/tokens';
 

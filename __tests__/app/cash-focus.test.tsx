@@ -1,3 +1,5 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { act, render, waitFor } from '@testing-library/react-native';
 
 import CashNativeScreen from '@/app/(tabs)/caixa.native';
@@ -13,13 +15,11 @@ const mockGetCashSummary = jest.fn(async () => ({
 const mockDatabase = {};
 
 jest.mock('expo-router', () => {
-  const React = require('react');
-
   return {
     useFocusEffect: (effect: () => void | (() => void)) => {
-      const effectRef = React.useRef(effect);
+      const effectRef = mockReact.useRef(effect);
       effectRef.current = effect;
-      React.useEffect(() => {
+      mockReact.useEffect(() => {
         let cleanup: (() => void) | undefined;
         const run = () => {
           cleanup?.();
@@ -65,11 +65,8 @@ jest.mock('@/application/expenseUseCases', () => ({
 }));
 
 jest.mock('@/features/cash/CashScreen', () => {
-  const React = require('react');
-  const { Text } = require('react-native');
-
   return function MockCashScreen({ summary }: { summary: { entriesCents: number } | null }) {
-    return React.createElement(Text, null, summary ? `cash-summary:${summary.entriesCents}` : 'cash-loading');
+    return mockReact.createElement(mockText, null, summary ? `cash-summary:${summary.entriesCents}` : 'cash-loading');
   };
 });
 

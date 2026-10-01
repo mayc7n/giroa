@@ -1,15 +1,14 @@
+import * as mockReact from 'react';
+import { Text as mockText } from 'react-native';
 import { render } from '@testing-library/react-native';
 
-jest.mock('@/features/today/TodayDashboard', () => {
-  const React = require('react');
-  const { Text: MockText } = require('react-native');
+import TodayNativeScreen from '@/app/(tabs)/hoje.native';
 
+jest.mock('@/features/today/TodayDashboard', () => {
   return function MockTodayDashboard() {
-    return React.createElement(MockText, null, 'today-dashboard-marker');
+    return mockReact.createElement(mockText, null, 'today-dashboard-marker');
   };
 });
-
-import TodayNativeScreen from '@/app/(tabs)/hoje.native';
 
 describe('Hoje nativo', () => {
   it('não mostra manutenção de dados como ação principal', () => {
