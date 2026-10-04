@@ -11,7 +11,7 @@ export default function GiroaLogo({ showWordmark = true }: GiroaLogoProps) {
     <View accessible accessibilityLabel="Giroa" accessibilityRole="image" style={styles.logo}>
       <View style={styles.mark}>
         <View style={styles.loop} />
-        <View style={styles.arrow} />
+        <View style={styles.gBar} />
       </View>
       {showWordmark ? <Text style={styles.wordmark}>giroa</Text> : null}
     </View>
@@ -42,17 +42,14 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     transform: [{ rotate: '-28deg' }],
   },
-  arrow: {
+  gBar: {
     position: 'absolute',
     top: spacing[4],
     right: spacing[3],
-    width: dimensions.logoArrow,
-    height: dimensions.logoArrow,
-    borderRightWidth: dimensions.logoStroke,
-    borderBottomWidth: dimensions.logoStroke,
-    borderRightColor: colors.background.canvas,
-    borderBottomColor: colors.background.canvas,
-    transform: [{ rotate: '-45deg' }],
+    width: dimensions.logoBar,
+    height: dimensions.logoStroke,
+    borderRadius: radii.pill,
+    backgroundColor: colors.background.canvas,
   },
   wordmark: {
     ...typeScale.section,

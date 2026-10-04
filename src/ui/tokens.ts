@@ -72,7 +72,7 @@ export const dimensions = {
   logoMark: 36,
   logoInner: 20,
   logoStroke: 3,
-  logoArrow: 7,
+  logoBar: 10,
 } as const;
 
 export const typeScale = {
