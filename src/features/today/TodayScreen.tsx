@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import type { TodaySummary } from '@/application/todayUseCases';
 import { formatCentsToBRL, formatSignedCentsToBRL } from '@/domain/money';
+import GiroaLogo from '@/ui/GiroaLogo';
 import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type TodayScreenProps = {
@@ -32,7 +33,7 @@ export default function TodayScreen({
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.eyebrow}>Giroa</Text>
+        <GiroaLogo />
         <Text style={styles.title}>Hoje</Text>
         <Text style={styles.introduction}>
           Acompanhe o que precisa da sua atenção no trabalho.
@@ -167,11 +168,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: spacing[5],
     gap: spacing[3],
-  },
-  eyebrow: {
-    ...typeScale.caption,
-    color: colors.interactive.accent,
-    letterSpacing: spacing[1] / 10,
   },
   title: {
     ...typeScale.display,

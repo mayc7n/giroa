@@ -40,6 +40,13 @@ const summaryWithPending: TodaySummary = {
 };
 
 describe('TodayScreen', () => {
+  it('apresenta a marca Giroa no cabeçalho de Hoje', () => {
+    const { getByRole, getByText } = render(<TodayScreen />);
+
+    expect(getByRole('image', { name: 'Giroa' })).toBeTruthy();
+    expect(getByText('giroa')).toBeTruthy();
+  });
+
   it('offers the first client action when the local workspace is empty', () => {
     const onOpenClients = jest.fn();
     const { getByText } = render(

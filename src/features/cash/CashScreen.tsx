@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CashMovement, CashSummary } from '@/application/paymentUseCases';
 import { formatISODateToBR } from '@/domain/date';
 import { formatCentsToBRL, formatSignedCentsToBRL } from '@/domain/money';
+import GiroaLogo from '@/ui/GiroaLogo';
 import { borders, colors, dimensions, radii, spacing, typeScale } from '@/ui/tokens';
 
 type CashScreenProps = {
@@ -73,7 +74,7 @@ export default function CashScreen({
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.eyebrow}>Giroa</Text>
+        <GiroaLogo />
         <Text style={styles.title}>Caixa</Text>
         <Text style={styles.description}>Entradas e saídas efetivamente registradas.</Text>
 
@@ -172,7 +173,6 @@ function MovementRow({ movement, onReverse }: { movement: CashMovement; onRevers
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background.canvas },
   content: { flexGrow: 1, gap: spacing[3], padding: spacing[5], backgroundColor: colors.background.canvas },
-  eyebrow: { ...typeScale.caption, color: colors.interactive.accent },
   title: { ...typeScale.display, color: colors.content.primary },
   description: { ...typeScale.section, color: colors.content.secondary, maxWidth: 440 },
   primaryAction: { minHeight: dimensions.action, alignItems: 'center', justifyContent: 'center', borderRadius: radii.md, backgroundColor: colors.interactive.accent, paddingHorizontal: spacing[4] },

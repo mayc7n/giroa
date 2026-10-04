@@ -69,6 +69,10 @@ export const dimensions = {
   action: 52,
   row: 56,
   input: 52,
+  logoMark: 36,
+  logoInner: 20,
+  logoStroke: 3,
+  logoArrow: 7,
 } as const;
 
 export const typeScale = {
